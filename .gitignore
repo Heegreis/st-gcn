@@ -9,6 +9,8 @@ model/*
 *.pt
 *.caffemodel
 cache/
+## tensorboardX by heegreis
+runs
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

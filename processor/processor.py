@@ -18,6 +18,9 @@ from torchlight import import_class
 
 from .io import IO
 
+# tensorboardX
+from tensorboardX import SummaryWriter
+
 class Processor(IO):
     """
         Base Processor
@@ -105,12 +108,13 @@ class Processor(IO):
 
         # training phase
         if self.arg.phase == 'train':
+            writer = SummaryWriter()
             for epoch in range(self.arg.start_epoch, self.arg.num_epoch):
                 self.meta_info['epoch'] = epoch
 
                 # training
                 self.io.print_log('Training epoch: {}'.format(epoch))
-                self.train()
+                self.train(writer)
                 self.io.print_log('Done.')
 
                 # save model
@@ -123,8 +127,9 @@ class Processor(IO):
                 if ((epoch + 1) % self.arg.eval_interval == 0) or (
                         epoch + 1 == self.arg.num_epoch):
                     self.io.print_log('Eval epoch: {}'.format(epoch))
-                    self.test()
+                    self.test(writer)
                     self.io.print_log('Done.')
+            writer.close()
         # test phase
         elif self.arg.phase == 'test':
 

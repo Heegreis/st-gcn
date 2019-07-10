@@ -69,13 +69,17 @@ class REC_Processor(Processor):
         else:
             self.lr = self.arg.base_lr
 
-    def show_topk(self, k):
+    def show_topk(self, k, writer):
         rank = self.result.argsort()
         hit_top_k = [l in rank[i, -k:] for i, l in enumerate(self.label)]
         accuracy = sum(hit_top_k) * 1.0 / len(hit_top_k)
+
+        # tensorbordX
+        writer.add_scalar('accuracy Top{}'.format(k), accuracy, self.meta_info['iter'])
+
         self.io.print_log('\tTop{}: {:.2f}%'.format(k, 100 * accuracy))
 
-    def train(self):
+    def train(self, writer):
         self.model.train()
         self.adjust_lr()
         loader = self.data_loader['train']
@@ -101,13 +105,18 @@ class REC_Processor(Processor):
             self.iter_info['lr'] = '{:.6f}'.format(self.lr)
             loss_value.append(self.iter_info['loss'])
             self.show_iter_info()
+            ## tensorbordX
+            if self.meta_info['iter'] % 10 == 0:
+                writer.add_scalar('Train_Loss', loss, self.meta_info['iter'])
+                writer.add_scalar('Learning_rate', self.lr, self.meta_info['iter'])
             self.meta_info['iter'] += 1
+
 
         self.epoch_info['mean_loss']= np.mean(loss_value)
         self.show_epoch_info()
         self.io.print_timer()
 
-    def test(self, evaluation=True):
+    def test(self, writer, evaluation=True):
 
         self.model.eval()
         loader = self.data_loader['test']
@@ -140,7 +149,7 @@ class REC_Processor(Processor):
 
             # show top-k accuracy
             for k in self.arg.show_topk:
-                self.show_topk(k)
+                self.show_topk(k, writer)
 
     @staticmethod
     def get_parser(add_help=False):
