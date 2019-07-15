@@ -21,7 +21,8 @@ if date == 3:
     dataName_config = "kinetics-skeleton"
     dataName_workdir = "kinetics_skeleton"
 
-cmd = "python3 main.py recognition -c config/st_gcn/"+ dataName_config +"/train.yaml --model net.st_gcn_"+ net_suffix +".Model --work_dir ./work_dir/recognition/"+ dataName_workdir +"/ST_GCN_" + net_suffix
+# cmd = "python3 main.py recognition -c config/st_gcn/"+ dataName_config +"/train.yaml --model net.st_gcn_"+ net_suffix +".Model --work_dir ./work_dir/recognition/"+ dataName_workdir +"/ST_GCN_" + net_suffix
+cmd = "python3 main.py recognition -c config/st_gcn/"+ dataName_config +"/train.yaml --model net.st_gcn.Model --work_dir ./work_dir/recognition/"+ dataName_workdir +"/ST_GCN_t2"
 os.system(cmd)
 
 tEnd = time.time()
