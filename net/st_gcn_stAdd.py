@@ -157,41 +157,44 @@ class st_gcn(nn.Module):
                                          kernel_size[1])
 
         self.tcn = nn.Sequential(
-            nn.BatchNorm2d(out_channels),
+            nn.BatchNorm2d(in_channels),
             nn.ReLU(inplace=True),
             nn.Conv2d(
-                out_channels,
-                out_channels,
+                in_channels,
+                in_channels,
                 (kernel_size[0], 1),
                 (stride, 1),
                 padding,
             ),
-            nn.BatchNorm2d(out_channels),
+            nn.BatchNorm2d(in_channels),
             nn.Dropout(dropout, inplace=True),
         )
 
-        if not residual:
-            self.residual = lambda x: 0
+        self.stride = stride
+        self.in_channels = in_channels
+        self.out_channels = out_channels
 
-        elif (in_channels == out_channels) and (stride == 1):
-            self.residual = lambda x: x
-
-        else:
-            self.residual = nn.Sequential(
-                nn.Conv2d(
-                    in_channels,
-                    out_channels,
-                    kernel_size=1,
-                    stride=(stride, 1)),
-                nn.BatchNorm2d(out_channels),
-            )
-
+        if in_channels != out_channels:
+            self.rechannel = nn.Conv2d(in_channels, out_channels, 1)
+            if stride == 2:
+                if out_channels == 128:
+                    T = 150
+                if out_channels == 256:
+                    T = 75
+                self.resize = nn.AdaptiveMaxPool2d((T, None))
+        
         self.relu = nn.ReLU(inplace=True)
 
     def forward(self, x, A):
 
-        res = self.residual(x)
-        x, A = self.gcn(x, A)
-        x = self.tcn(x) + res
+        gcn_x, A = self.gcn(x, A)
+        tcn_x = self.tcn(x)
+
+        if self.in_channels != self.out_channels:
+            tcn_x = self.rechannel(tcn_x)
+            if self.stride == 2:
+                gcn_x = self.resize(gcn_x)
+
+        x = gcn_x + tcn_x
 
         return self.relu(x), A
