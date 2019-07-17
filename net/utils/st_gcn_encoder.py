@@ -7,8 +7,8 @@ from net.utils.st_gcn import st_gcn
 
 class Encoder(nn.Module):
     def __init__(self, in_channels, kernel_size,
-                 edge_importance_weighting, kwargs):
-        super(Encoder, self).__init__()
+                 A, edge_importance, **kwargs):
+        super().__init__()
 
         kwargs0 = {k: v for k, v in kwargs.items() if k != 'dropout'}
 
@@ -24,8 +24,12 @@ class Encoder(nn.Module):
             st_gcn(256, 256, kernel_size, 1, **kwargs),
             st_gcn(256, 256, kernel_size, 1, **kwargs),
         ))
+
+        self.edge_importance = edge_importance
+        self.A = A
     
     def forward(self, x):
-        # forwad
         for gcn, importance in zip(self.st_gcn_networks, self.edge_importance):
             x, _ = gcn(x, self.A * importance)
+
+        return x

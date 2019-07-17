@@ -42,23 +42,12 @@ class Model(nn.Module):
         temporal_kernel_size = 9
         kernel_size = (temporal_kernel_size, spatial_kernel_size)
         self.data_bn = nn.BatchNorm1d(in_channels * A.size(1))
-        
-        
-
-        # initialize parameters for edge importance weighting
-        if edge_importance_weighting:
-            self.edge_importance = nn.ParameterList([
-                nn.Parameter(torch.ones(self.A.size()))
-                for i in self.st_gcn_networks
-            ])
-        else:
-            self.edge_importance = [1] * len(self.st_gcn_networks)
 
         # fcn for prediction
         self.fcn = nn.Conv2d(256, num_class, kernel_size=1)
 
         # new
-        self.encoder = 
+        self.encoder = Encoder(in_channels, kernel_size)
 
     def forward(self, x):
 
