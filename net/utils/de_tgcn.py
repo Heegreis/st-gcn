@@ -59,11 +59,12 @@ class DeConvTemporalGraphical(nn.Module):
     def forward(self, x, A):
         assert A.size(0) == self.kernel_size
 
-        A_inverse = torch.inverse(A)
-        x = torch.einsum('nctw,kvw->nkctv', (x, A_inverse))
+        # A_inverse = torch.inverse(A)
+        # x = torch.einsum('nctw,kvw->nkctv', (x, A_inverse))
+        x = torch.einsum('nctw,kvw->nkctv', (x, A))
         x.contiguous()
         n, k, c, t, v = x.size()
-        x = x.view(n, k*c, t, v)
+        x = x.contiguous().view(n, k*c, t, v)
 
         x = self.de_conv(x)
 

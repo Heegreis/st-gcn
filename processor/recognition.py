@@ -94,7 +94,7 @@ class REC_Processor(Processor):
             self.adjust_lr()
             loader = self.data_loader['train']
             loss_value = []
-
+            
             for data, label in loader:
 
                 # get data
@@ -128,6 +128,9 @@ class REC_Processor(Processor):
                 if self.meta_info['iter'] % 10 == 0:
                     writer.add_scalar('Train_Loss', loss, self.meta_info['iter'])
                     writer.add_scalar('Learning_rate', self.lr, self.meta_info['iter'])
+                ## tensorbordX for autoencoder
+                if self.meta_info['iter'] % 10 == 0:
+                    writer.add_scalar('Train_Loss_autoencoder', loss_autoencoder, self.meta_info['iter'])
                 self.meta_info['iter'] += 1
 
 

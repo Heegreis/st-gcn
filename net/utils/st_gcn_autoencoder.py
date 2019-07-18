@@ -25,10 +25,10 @@ class AutoEncoder(nn.Module):
         x = x.view(N, M, V, C, T) # N, M, V, C, T
         x = x.permute(0, 1, 3, 4, 2).contiguous() # N, M, C, T, V
         x = x.view(N * M, C, T, V) # N*M, C, T, V
-
+        
         x = self.encoder(x)
         x = self.decoder(x)
-
+        
         # data normalization back # N*M, C, T, V
         x = x.view(N, M, C, T, V) # N, M, C, T, V
         x = x.permute(0, 1, 4, 2, 3).contiguous() # N, M, V, C, T

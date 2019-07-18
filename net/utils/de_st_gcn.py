@@ -46,6 +46,10 @@ class de_st_gcn(nn.Module):
         self.gcn = DeConvTemporalGraphical(in_channels, out_channels,
                                          kernel_size[1])
 
+        if stride == 2:
+            output_padding = 1
+        else:
+            output_padding = 0
         self.de_tcn = nn.Sequential(
             nn.BatchNorm2d(in_channels),
             nn.ConvTranspose2d(
@@ -54,6 +58,7 @@ class de_st_gcn(nn.Module):
                 (kernel_size[0], 1),
                 (stride, 1),
                 padding,
+                output_padding=(output_padding, 0)
             ),
             nn.ReLU(inplace=True),
             nn.BatchNorm2d(in_channels),
@@ -62,7 +67,6 @@ class de_st_gcn(nn.Module):
         self.relu = nn.ReLU(inplace=True)
 
     def forward(self, x, A):
-
         x = self.de_tcn(x)
         x, A = self.gcn(x, A)
 

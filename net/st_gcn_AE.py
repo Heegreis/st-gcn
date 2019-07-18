@@ -46,20 +46,22 @@ class Model(nn.Module):
         self.data_bn = nn.BatchNorm1d(in_channels * A.size(1))
 
         # initialize parameters for edge importance weighting
-        if edge_importance_weighting:
-            edge_importance = nn.ParameterList([
-                nn.Parameter(torch.ones(self.A.size()))
-                for i in self.st_gcn_networks
-            ])
-        else:
-            edge_importance = [1] * len(self.st_gcn_networks)
+        # if edge_importance_weighting:
+        #     edge_importance = nn.ParameterList([
+        #         nn.Parameter(torch.ones(self.A.size()))
+        #         for i in self.st_gcn_networks
+        #     ])
+        # else:
+        #     edge_importance = [1] * len(self.st_gcn_networks)
 
         # fcn for prediction
         self.fcn = nn.Conv2d(256, num_class, kernel_size=1)
 
         # new
-        self.encoder = Encoder(in_channels, kernel_size, A, edge_importance, **kwargs)
-        self.decoder = Decoder(in_channels, kernel_size, A, edge_importance, **kwargs)
+        # self.encoder = Encoder(in_channels, kernel_size, A, edge_importance, **kwargs)
+        # self.decoder = Decoder(in_channels, kernel_size, A, edge_importance, **kwargs)
+        self.encoder = Encoder(in_channels, kernel_size, edge_importance_weighting, graph_args, **kwargs)
+        self.decoder = Decoder(in_channels, kernel_size, edge_importance_weighting, graph_args, **kwargs)
         self.autoencoder = AutoEncoder(self.encoder, self.decoder, self.data_bn)
 
     def forward(self, x):
