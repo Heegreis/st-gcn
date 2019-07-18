@@ -5,11 +5,14 @@ tStart = time.time()
 
 # --model net.st_gcn.Model --work_dir ./work_dir/recognition/ntu-xsub/ST_GCN --device 0 --batch_size 16 --test_batch_size 16
 
-net_suffix = "separableConv"
-date = 1
+net_suffix = "stAddRes"
+date = 2
 # 1. ntu-xsub
 # 2. ntu-xview
 # 3. kinetics-skeleton
+
+if net_suffix != "":
+    net_suffix = "_" + net_suffix
 
 if date == 1:
     dataName_config = "ntu-xsub"
@@ -21,7 +24,7 @@ if date == 3:
     dataName_config = "kinetics-skeleton"
     dataName_workdir = "kinetics_skeleton"
 
-cmd = "python3 main.py recognition -c config/st_gcn/"+ dataName_config +"/train.yaml --model net.st_gcn_"+ net_suffix +".Model --work_dir ./work_dir/recognition/"+ dataName_workdir +"/ST_GCN_" + net_suffix
+cmd = "python3 main.py recognition -c config/st_gcn/"+ dataName_config +"/train.yaml --model net.st_gcn"+ net_suffix +".Model --work_dir ./work_dir/recognition/"+ dataName_workdir +"/ST_GCN" + net_suffix
 os.system(cmd)
 
 tEnd = time.time()
