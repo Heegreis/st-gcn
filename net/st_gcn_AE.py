@@ -6,7 +6,9 @@ from torch.autograd import Variable
 from net.utils.tgcn import ConvTemporalGraphical
 from net.utils.graph import Graph
 
+from net.utils.st_gcn_autoencoder import AutoEncoder
 from net.utils.st_gcn_encoder import Encoder
+from net.utils.st_gcn_decoder import Decoder
 
 class Model(nn.Module):
     r"""Spatial temporal graph convolutional networks.
@@ -43,11 +45,22 @@ class Model(nn.Module):
         kernel_size = (temporal_kernel_size, spatial_kernel_size)
         self.data_bn = nn.BatchNorm1d(in_channels * A.size(1))
 
+        # initialize parameters for edge importance weighting
+        if edge_importance_weighting:
+            edge_importance = nn.ParameterList([
+                nn.Parameter(torch.ones(self.A.size()))
+                for i in self.st_gcn_networks
+            ])
+        else:
+            edge_importance = [1] * len(self.st_gcn_networks)
+
         # fcn for prediction
         self.fcn = nn.Conv2d(256, num_class, kernel_size=1)
 
         # new
-        self.encoder = Encoder(in_channels, kernel_size)
+        self.encoder = Encoder(in_channels, kernel_size, A, edge_importance, **kwargs)
+        self.decoder = Decoder(in_channels, kernel_size, A, edge_importance, **kwargs)
+        self.autoencoder = AutoEncoder(self.encoder, self.decoder)
 
     def forward(self, x):
 
@@ -61,9 +74,7 @@ class Model(nn.Module):
         x = x.view(N * M, C, T, V)
 
         # forwad
-        for gcn, importance in zip(self.st_gcn_networks, self.edge_importance):
-            x, _ = gcn(x, self.A * importance)
-
+        x = self.encoder(x)
 
 
         # global pooling

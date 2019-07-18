@@ -58,6 +58,8 @@ class REC_Processor(Processor):
                 weight_decay=self.arg.weight_decay)
         else:
             raise ValueError()
+        if self.arg.model == "":
+            pass
 
     def adjust_lr(self):
         if self.arg.optimizer == 'SGD' and self.arg.step:
@@ -81,6 +83,7 @@ class REC_Processor(Processor):
 
     def train(self, writer):
         if self.arg.autoencoder == True:
+            self.model.autoencoder.train()
             self.model.train()
             self.adjust_lr()
             loader = self.data_loader['train']
@@ -91,6 +94,15 @@ class REC_Processor(Processor):
                 # get data
                 data = data.float().to(self.dev)
                 label = label.long().to(self.dev)
+
+                # forward for autoencoder
+                output = self.model(data)
+                loss = self.loss(output, label)
+
+                # backward for autoencoder
+                self.optimizer.zero_grad()
+                loss.backward()
+                self.optimizer.step()
 
                 # forward
                 output = self.model(data)
