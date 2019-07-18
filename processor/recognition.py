@@ -42,6 +42,9 @@ class REC_Processor(Processor):
                                         **(self.arg.model_args))
         self.model.apply(weights_init)
         self.loss = nn.CrossEntropyLoss()
+
+        if self.arg.model == "net.st_gcn_AE.Model":
+            self.loss_autoencoder = nn.MSELoss()
         
     def load_optimizer(self):
         if self.arg.optimizer == 'SGD':
@@ -58,8 +61,11 @@ class REC_Processor(Processor):
                 weight_decay=self.arg.weight_decay)
         else:
             raise ValueError()
-        if self.arg.model == "":
-            pass
+        if self.arg.model == "net.st_gcn_AE.Model":
+            self.optimizer_autoencoder = optim.Adam(
+                self.model.autoencoder.parameters(),
+                lr=self.arg.base_lr,
+                weight_decay=self.arg.weight_decay)
 
     def adjust_lr(self):
         if self.arg.optimizer == 'SGD' and self.arg.step:
@@ -82,7 +88,7 @@ class REC_Processor(Processor):
         self.io.print_log('\tTop{}: {:.2f}%'.format(k, 100 * accuracy))
 
     def train(self, writer):
-        if self.arg.autoencoder == True:
+        if self.arg.model == "net.st_gcn_AE.Model":
             self.model.autoencoder.train()
             self.model.train()
             self.adjust_lr()
@@ -96,13 +102,13 @@ class REC_Processor(Processor):
                 label = label.long().to(self.dev)
 
                 # forward for autoencoder
-                output = self.model(data)
-                loss = self.loss(output, label)
+                output_autoencoder = self.model.autoencoder(data)
+                loss_autoencoder = self.loss_autoencoder(output_autoencoder, data)
 
                 # backward for autoencoder
-                self.optimizer.zero_grad()
-                loss.backward()
-                self.optimizer.step()
+                self.optimizer_autoencoder.zero_grad()
+                loss_autoencoder.backward()
+                self.optimizer_autoencoder.step()
 
                 # forward
                 output = self.model(data)

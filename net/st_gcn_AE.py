@@ -60,7 +60,7 @@ class Model(nn.Module):
         # new
         self.encoder = Encoder(in_channels, kernel_size, A, edge_importance, **kwargs)
         self.decoder = Decoder(in_channels, kernel_size, A, edge_importance, **kwargs)
-        self.autoencoder = AutoEncoder(self.encoder, self.decoder)
+        self.autoencoder = AutoEncoder(self.encoder, self.decoder, self.data_bn)
 
     def forward(self, x):
 
