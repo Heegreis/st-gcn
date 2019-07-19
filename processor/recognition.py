@@ -102,7 +102,7 @@ class REC_Processor(Processor):
                 label = label.long().to(self.dev)
 
                 # forward for autoencoder
-                output_autoencoder = self.model.autoencoder(data)
+                output_autoencoder = self.model.autoencoder(data, writer, self.meta_info['iter'])
                 loss_autoencoder = self.loss_autoencoder(output_autoencoder, data)
 
                 # backward for autoencoder
