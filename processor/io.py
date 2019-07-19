@@ -90,9 +90,9 @@ class IO():
         if self.arg.use_gpu and len(self.gpus) > 1:
             self.model = nn.DataParallel(self.model, device_ids=self.gpus)
             if self.arg.model == "net.st_gcn_AE.Model":
-                self.model.autoencoder = nn.DataParallel(self.model.autoencoder, device_ids=self.gpus)
-                self.model.encoder = nn.DataParallel(self.model.encoder, device_ids=self.gpus)
-                self.model.decoder = nn.DataParallel(self.model.decoder, device_ids=self.gpus)
+                self.model.autoencoder = nn.DataParallel(self.model.module.autoencoder, device_ids=self.gpus)
+                self.model.encoder = nn.DataParallel(self.model.module.encoder, device_ids=self.gpus)
+                self.model.decoder = nn.DataParallel(self.model.module.decoder, device_ids=self.gpus)
 
     def start(self):
         self.io.print_log('Parameters:\n{}\n'.format(str(vars(self.arg))))
