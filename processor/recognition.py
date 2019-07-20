@@ -42,6 +42,10 @@ class REC_Processor(Processor):
                                         **(self.arg.model_args))
         self.model.apply(weights_init)
         self.loss = nn.CrossEntropyLoss()
+
+        if self.arg.model == "net.st_gcn_AE.Model":
+            # self.loss_autoencoder = nn.MSELoss()
+            self.loss_autoencoder = nn.BCELoss()
         
     def load_optimizer(self):
         if self.arg.optimizer == 'SGD':
@@ -58,6 +62,11 @@ class REC_Processor(Processor):
                 weight_decay=self.arg.weight_decay)
         else:
             raise ValueError()
+        if self.arg.model == "net.st_gcn_AE.Model":
+            self.optimizer_autoencoder = optim.Adam(
+                self.model.autoencoder.parameters(),
+                lr=self.arg.base_lr,
+                weight_decay=self.arg.weight_decay)
 
     def adjust_lr(self):
         if self.arg.optimizer == 'SGD' and self.arg.step:
@@ -80,41 +89,93 @@ class REC_Processor(Processor):
         self.io.print_log('\tTop{}: {:.2f}%'.format(k, 100 * accuracy))
 
     def train(self, writer):
-        self.model.train()
-        self.adjust_lr()
-        loader = self.data_loader['train']
-        loss_value = []
+        if self.arg.model == "net.st_gcn_AE.Model":
+            self.model.autoencoder.train()
+            self.model.train()
+            self.adjust_lr()
+            loader = self.data_loader['train']
+            loss_value = []
+            
+            for data, label in loader:
 
-        for data, label in loader:
+                # get data
+                data = data.float().to(self.dev)
+                label = label.long().to(self.dev)
 
-            # get data
-            data = data.float().to(self.dev)
-            label = label.long().to(self.dev)
+                # forward for autoencoder
+                output_autoencoder = self.model.autoencoder(data, writer, self.meta_info['iter'])
+                output_autoencoder = torch.sigmoid(output_autoencoder)
+                data_sigmoid = torch.sigmoid(data)
+                loss_autoencoder = self.loss_autoencoder(output_autoencoder, data_sigmoid)
 
-            # forward
-            output = self.model(data)
-            loss = self.loss(output, label)
+                # backward for autoencoder
+                self.optimizer_autoencoder.zero_grad()
+                loss_autoencoder.backward()
+                self.optimizer_autoencoder.step()
 
-            # backward
-            self.optimizer.zero_grad()
-            loss.backward()
-            self.optimizer.step()
+                # forward
+                output = self.model(data)
+                loss = self.loss(output, label)
 
-            # statistics
-            self.iter_info['loss'] = loss.data.item()
-            self.iter_info['lr'] = '{:.6f}'.format(self.lr)
-            loss_value.append(self.iter_info['loss'])
-            self.show_iter_info()
-            ## tensorbordX
-            if self.meta_info['iter'] % 10 == 0:
-                writer.add_scalar('Train_Loss', loss, self.meta_info['iter'])
-                writer.add_scalar('Learning_rate', self.lr, self.meta_info['iter'])
-            self.meta_info['iter'] += 1
+                # backward
+                self.optimizer.zero_grad()
+                loss.backward()
+                self.optimizer.step()
+
+                # statistics
+                self.iter_info['loss'] = loss.data.item()
+                self.iter_info['lr'] = '{:.6f}'.format(self.lr)
+                loss_value.append(self.iter_info['loss'])
+                self.show_iter_info()
+                ## tensorbordX
+                if self.meta_info['iter'] % 10 == 0:
+                    writer.add_scalar('Train_Loss', loss, self.meta_info['iter'])
+                    writer.add_scalar('Learning_rate', self.lr, self.meta_info['iter'])
+                ## tensorbordX for autoencoder
+                if self.meta_info['iter'] % 10 == 0:
+                    writer.add_scalar('Train_Loss_autoencoder', loss_autoencoder, self.meta_info['iter'])
+                self.meta_info['iter'] += 1
 
 
-        self.epoch_info['mean_loss']= np.mean(loss_value)
-        self.show_epoch_info()
-        self.io.print_timer()
+            self.epoch_info['mean_loss']= np.mean(loss_value)
+            self.show_epoch_info()
+            self.io.print_timer()
+        else:
+            self.model.train()
+            self.adjust_lr()
+            loader = self.data_loader['train']
+            loss_value = []
+
+            for data, label in loader:
+
+                # get data
+                data = data.float().to(self.dev)
+                label = label.long().to(self.dev)
+
+                # forward
+                output = self.model(data)
+                loss = self.loss(output, label)
+
+                # backward
+                self.optimizer.zero_grad()
+                loss.backward()
+                self.optimizer.step()
+
+                # statistics
+                self.iter_info['loss'] = loss.data.item()
+                self.iter_info['lr'] = '{:.6f}'.format(self.lr)
+                loss_value.append(self.iter_info['loss'])
+                self.show_iter_info()
+                ## tensorbordX
+                if self.meta_info['iter'] % 10 == 0:
+                    writer.add_scalar('Train_Loss', loss, self.meta_info['iter'])
+                    writer.add_scalar('Learning_rate', self.lr, self.meta_info['iter'])
+                self.meta_info['iter'] += 1
+
+
+            self.epoch_info['mean_loss']= np.mean(loss_value)
+            self.show_epoch_info()
+            self.io.print_timer()
 
     def test(self, writer, evaluation=True):
 
