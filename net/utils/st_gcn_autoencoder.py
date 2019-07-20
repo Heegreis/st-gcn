@@ -17,9 +17,10 @@ class AutoEncoder(nn.Module):
         self.decoder = decoder
         self.data_bn = data_bn
     
-    def forward(self, x, writer, current_iter):
-        if current_iter % 10 == 0:
-            writer.add_image('input_img', make_grid(x[0, :, :, :, 0].detach().cpu().unsqueeze(dim=1), nrow=3, padding=20, normalize=True, pad_value=1), current_iter)
+    def forward(self, x, writer = None, current_iter = None):
+        if writer != None and current_iter != None:
+            if current_iter % 10 == 0:
+                writer.add_image('input_img', make_grid(x[0, :, :, :, 0].detach().cpu().unsqueeze(dim=1), nrow=3, padding=20, normalize=True, pad_value=1), current_iter)
 
         # data normalization
         N, C, T, V, M = x.size()
@@ -31,18 +32,21 @@ class AutoEncoder(nn.Module):
         x = x.view(N * M, C, T, V) # N*M, C, T, V
         
         
-        if current_iter % 10 == 0:
-            writer.add_image('normalized_input_img', make_grid(x[0].detach().cpu().unsqueeze(dim=1), nrow=3, padding=20, normalize=True, pad_value=1), current_iter)
+        if writer != None and current_iter != None:
+            if current_iter % 10 == 0:
+                writer.add_image('normalized_input_img', make_grid(x[0].detach().cpu().unsqueeze(dim=1), nrow=3, padding=20, normalize=True, pad_value=1), current_iter)
 
         x = self.encoder(x)
 
-        if current_iter % 10 == 0:
-            writer.add_image('code_img', make_grid(x[0].detach().cpu().unsqueeze(dim=1), nrow=16, padding=10, normalize=True, pad_value=1), current_iter)
+        if writer != None and current_iter != None:
+            if current_iter % 10 == 0:
+                writer.add_image('code_img', make_grid(x[0].detach().cpu().unsqueeze(dim=1), nrow=16, padding=10, normalize=True, pad_value=1), current_iter)
         
         x = self.decoder(x)
 
-        if current_iter % 10 == 0:
-            writer.add_image('decode_img', make_grid(x[0].detach().cpu().unsqueeze(dim=1), nrow=3, padding=20, normalize=True, pad_value=1), current_iter)
+        if writer != None and current_iter != None:
+            if current_iter % 10 == 0:
+                writer.add_image('decode_img', make_grid(x[0].detach().cpu().unsqueeze(dim=1), nrow=3, padding=20, normalize=True, pad_value=1), current_iter)
 
         # data normalization back # N*M, C, T, V
         x = x.view(N, M, C, T, V) # N, M, C, T, V
@@ -52,7 +56,8 @@ class AutoEncoder(nn.Module):
         x = x.view(N, M, V, C, T) # N, M, V, C, T
         x = x.permute(0, 3, 4, 2, 1).contiguous() # N, C, T, V, M
 
-        if current_iter % 10 == 0:
-            writer.add_image('output_img', make_grid(x[0, :, :, :, 0].detach().cpu().unsqueeze(dim=1), nrow=3, padding=20, normalize=True, pad_value=1), current_iter)
+        if writer != None and current_iter != None:
+            if current_iter % 10 == 0:
+                writer.add_image('output_img', make_grid(x[0, :, :, :, 0].detach().cpu().unsqueeze(dim=1), nrow=3, padding=20, normalize=True, pad_value=1), current_iter)
 
         return x

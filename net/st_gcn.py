@@ -6,6 +6,8 @@ from torch.autograd import Variable
 from net.utils.tgcn import ConvTemporalGraphical
 from net.utils.graph import Graph
 
+from torchvision.utils import make_grid
+
 class Model(nn.Module):
     r"""Spatial temporal graph convolutional networks.
 
@@ -66,7 +68,10 @@ class Model(nn.Module):
         # fcn for prediction
         self.fcn = nn.Conv2d(256, num_class, kernel_size=1)
 
-    def forward(self, x):
+    def forward(self, x, writer=None, current_iter=None):
+        if writer != None and current_iter != None:
+            if current_iter % 100 == 0:
+                writer.add_image('input_img', make_grid(x[0, :, :, :, 0].detach().cpu().unsqueeze(dim=1), nrow=3, padding=20, normalize=True, pad_value=1), current_iter)
 
         # data normalization
         N, C, T, V, M = x.size()
@@ -77,9 +82,17 @@ class Model(nn.Module):
         x = x.permute(0, 1, 3, 4, 2).contiguous()
         x = x.view(N * M, C, T, V)
 
+        if writer != None and current_iter != None:
+            if current_iter % 100 == 0:
+                writer.add_image('normalized_input_img', make_grid(x[0].detach().cpu().unsqueeze(dim=1), nrow=3, padding=20, normalize=True, pad_value=1), current_iter)
+
         # forwad
         for gcn, importance in zip(self.st_gcn_networks, self.edge_importance):
             x, _ = gcn(x, self.A * importance)
+
+        if writer != None and current_iter != None:
+            if current_iter % 100 == 0:
+                writer.add_image('code_img', make_grid(x[0].detach().cpu().unsqueeze(dim=1), nrow=16, padding=10, normalize=True, pad_value=1), current_iter)
 
         # global pooling
         x = F.avg_pool2d(x, x.size()[2:])
