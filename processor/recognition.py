@@ -44,8 +44,8 @@ class REC_Processor(Processor):
         self.loss = nn.CrossEntropyLoss()
 
         if self.arg.model == "net.st_gcn_AE.Model":
-            # self.loss_autoencoder = nn.MSELoss()
-            self.loss_autoencoder = nn.BCELoss()
+            self.loss_autoencoder = nn.MSELoss()
+            # self.loss_autoencoder = nn.BCELoss()
         
     def load_optimizer(self):
         if self.arg.optimizer == 'SGD':
@@ -104,9 +104,9 @@ class REC_Processor(Processor):
 
                 # forward for autoencoder
                 output_autoencoder = self.model.autoencoder(data, writer, self.meta_info['iter'])
-                output_autoencoder = torch.sigmoid(output_autoencoder)
-                data_sigmoid = torch.sigmoid(data)
-                loss_autoencoder = self.loss_autoencoder(output_autoencoder, data_sigmoid)
+                # output_autoencoder = torch.sigmoid(output_autoencoder)
+                # data = torch.sigmoid(data)
+                loss_autoencoder = self.loss_autoencoder(output_autoencoder, data)
 
                 # backward for autoencoder
                 self.optimizer_autoencoder.zero_grad()
