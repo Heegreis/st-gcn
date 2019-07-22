@@ -5,9 +5,9 @@ tStart = time.time()
 
 # --model net.st_gcn.Model --work_dir ./work_dir/recognition/ntu-xsub/ST_GCN --device 0 --batch_size 16 --test_batch_size 16
 
-net_suffix = "stAddRes"
-train_version = ""
-date = 2
+net_suffix = "AE"
+train_version = "SGD"
+date = 1
 # 1. ntu-xsub
 # 2. ntu-xview
 # 3. kinetics-skeleton

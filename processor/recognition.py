@@ -63,9 +63,15 @@ class REC_Processor(Processor):
         else:
             raise ValueError()
         if self.arg.model == "net.st_gcn_AE.Model":
-            self.optimizer_autoencoder = optim.Adam(
+            # self.optimizer_autoencoder = optim.Adam(
+            #     self.model.autoencoder.parameters(),
+            #     lr=self.arg.base_lr,
+            #     weight_decay=self.arg.weight_decay)
+            self.optimizer_autoencoder = optim.SGD(
                 self.model.autoencoder.parameters(),
                 lr=self.arg.base_lr,
+                momentum=0.9,
+                nesterov=self.arg.nesterov,
                 weight_decay=self.arg.weight_decay)
 
     def adjust_lr(self):
@@ -193,7 +199,7 @@ class REC_Processor(Processor):
 
             # inference
             with torch.no_grad():
-                output = self.model(data, writer)
+                output = self.model(data)
             result_frag.append(output.data.cpu().numpy())
 
             # get loss

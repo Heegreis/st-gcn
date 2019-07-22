@@ -10,9 +10,6 @@ from net.utils.st_gcn_autoencoder import AutoEncoder
 from net.utils.st_gcn_encoder import Encoder
 from net.utils.st_gcn_decoder import Decoder
 
-# tensorboardX
-from tensorboardX import SummaryWriter
-
 class Model(nn.Module):
     r"""Spatial temporal graph convolutional networks.
 
@@ -67,9 +64,8 @@ class Model(nn.Module):
         self.decoder = Decoder(in_channels, kernel_size, edge_importance_weighting, graph_args, **kwargs)
         self.autoencoder = AutoEncoder(self.encoder, self.decoder, self.data_bn)
 
-        writer = SummaryWriter()
 
-    def forward(self, x):
+    def forward(self, x, writer=None, current_iter=None):
 
         # data normalization
         N, C, T, V, M = x.size()
