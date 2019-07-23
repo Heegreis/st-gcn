@@ -83,6 +83,12 @@ class REC_Processor(Processor):
             self.lr = lr
         else:
             self.lr = self.arg.base_lr
+        if self.arg.model == "net.st_gcn_AE.Model":
+            lr = self.arg.base_lr * (
+                0.1**np.sum(self.meta_info['epoch']>= np.array(self.arg.step)))
+            for param_group in self.optimizer_autoencoder.param_groups:
+                param_group['lr'] = lr
+            self.lr_autoencoder = lr
 
     def show_topk(self, k, writer):
         rank = self.result.argsort()
@@ -140,6 +146,7 @@ class REC_Processor(Processor):
                 ## tensorbordX for autoencoder
                 if self.meta_info['iter'] % 10 == 0:
                     writer.add_scalar('Train_Loss_autoencoder', loss_autoencoder, self.meta_info['iter'])
+                    writer.add_scalar('Learning_rate_autoencoder', self.lr_autoencoder, self.meta_info['iter'])
                 self.meta_info['iter'] += 1
 
 
@@ -207,6 +214,8 @@ class REC_Processor(Processor):
                 loss = self.loss(output, label)
                 loss_value.append(loss.item())
                 label_frag.append(label.data.cpu().numpy())
+                ## tensorbordX
+                writer.add_scalar('Test_Loss', loss, self.meta_info['iter'])
 
         self.result = np.concatenate(result_frag)
         if evaluation:
