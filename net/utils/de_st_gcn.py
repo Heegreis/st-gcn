@@ -46,24 +46,12 @@ class de_st_gcn(nn.Module):
         self.gcn = DeConvTemporalGraphical(in_channels, out_channels,
                                          kernel_size[1])
 
-        if stride == 2:
-            output_padding = 1
-        else:
-            output_padding = 0
         self.de_tcn = nn.Sequential(
             nn.BatchNorm2d(in_channels),
-            nn.ConvTranspose2d(
-                in_channels,
-                in_channels,
-                (kernel_size[0], 1),
-                (stride, 1),
-                padding,
-                output_padding=(output_padding, 0)
-            ),
+            Interpolate(scale_factor=(1/stride, 1), mode='bilinear'),
             nn.ReLU(inplace=True),
             nn.BatchNorm2d(in_channels),
         )
-
         self.relu = nn.ReLU(inplace=True)
 
     def forward(self, x, A):
@@ -71,3 +59,15 @@ class de_st_gcn(nn.Module):
         x, A = self.gcn(x, A)
 
         return self.relu(x), A
+
+class Interpolate(nn.Module):
+    def __init__(self, size=None, scale_factor=None, mode='nearest'):
+        super(Interpolate, self).__init__()
+        self.interp = F.interpolate
+        self.size = size
+        self.scale_factor = scale_factor
+        self.mode = mode
+        
+    def forward(self, x):
+        x = self.interp(x, size=self.size, scale_factor=self.scale_factor, mode=self.mode, align_corners=False)
+        return x
