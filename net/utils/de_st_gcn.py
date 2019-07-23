@@ -48,7 +48,7 @@ class de_st_gcn(nn.Module):
 
         self.de_tcn = nn.Sequential(
             nn.BatchNorm2d(in_channels),
-            Interpolate(scale_factor=(1/stride, 1), mode='bilinear'),
+            Interpolate(scale_factor=(stride, 1), mode='bilinear'),
             nn.ReLU(inplace=True),
             nn.BatchNorm2d(in_channels),
         )
