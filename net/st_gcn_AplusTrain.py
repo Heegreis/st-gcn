@@ -61,7 +61,7 @@ class Model(nn.Module):
         # initialize parameters for edge importance weighting
         if edge_importance_weighting:
             self.edge_importance = nn.ParameterList([
-                nn.Parameter(torch.ones(self.A.size()))
+                nn.Parameter(torch.zeros(self.A.size()))
                 for i in self.st_gcn_networks
             ])
         else:
