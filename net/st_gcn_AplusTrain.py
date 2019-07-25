@@ -95,6 +95,7 @@ class Model(nn.Module):
         if writer != None and current_iter != None:
             if current_iter % 100 == 0:
                 writer.add_image('code_img', make_grid(x[0].detach().cpu().unsqueeze(dim=1), nrow=16, padding=10, normalize=True, pad_value=1), current_iter)
+                writer.add_image("Aplus", make_grid(self.Aplus.unsqueeze(dim=0), normalize=True), current_iter)
 
         # global pooling
         x = F.avg_pool2d(x, x.size()[2:])
