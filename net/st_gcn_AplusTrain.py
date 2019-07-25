@@ -37,7 +37,7 @@ class Model(nn.Module):
         A = torch.tensor(self.graph.A, dtype=torch.float32, requires_grad=False)
         self.register_buffer('A', A)
 
-        self.Aplus = nn.Parameter(torch.ones(self.A[0].size()).unsqueeze(0))
+        self.Aplus = nn.Parameter(torch.zeros(self.A[0].size()).unsqueeze(0))
 
         # build networks
         spatial_kernel_size = A.size(0)
