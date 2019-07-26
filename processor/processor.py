@@ -109,6 +109,13 @@ class Processor(IO):
         # training phase
         if self.arg.phase == 'train':
             writer = SummaryWriter()
+
+            pretrained_dict = torch.load('models/st_gcn.ntu-xsub.pt')
+            model_dict = self.model.state_dict()
+            pretrained_dict = {k: v for k, v in pretrained_dict.items() if k in model_dict}
+            model_dict.update(pretrained_dict)
+            self.model.load_state_dict(model_dict)
+
             for epoch in range(self.arg.start_epoch, self.arg.num_epoch):
                 self.meta_info['epoch'] = epoch
 

@@ -45,7 +45,7 @@ class ConvTemporalGraphical(nn.Module):
         super().__init__()
 
         self.kernel_size = kernel_size + 1
-        self.conv = nn.Conv2d(
+        self.convAplus = nn.Conv2d(
             in_channels,
             out_channels * (kernel_size + 1),
             kernel_size=(t_kernel_size, 1),
@@ -58,7 +58,7 @@ class ConvTemporalGraphical(nn.Module):
         assert A.size(0) == self.kernel_size - 1
         
 
-        x = self.conv(x)
+        x = self.convAplus(x)
 
         n, kc, t, v = x.size()
         x = x.view(n, self.kernel_size, kc//self.kernel_size, t, v)

@@ -37,7 +37,12 @@ class Model(nn.Module):
         A = torch.tensor(self.graph.A, dtype=torch.float32, requires_grad=False)
         self.register_buffer('A', A)
 
-        self.Aplus = nn.Parameter(torch.zeros(self.A[0].size()).unsqueeze(0))
+        # self.Aplus = nn.Parameter(torch.zeros(self.A[0].size()).unsqueeze(0))
+        # Gaussian init
+        mean = torch.zeros(self.A[0].size())
+        std = torch.ones(self.A[0].size())
+        Aplus_Gaussian = torch.normal(mean=mean, std=std)
+        self.Aplus = nn.Parameter(Aplus_Gaussian.unsqueeze(0))
 
         # build networks
         spatial_kernel_size = A.size(0)
