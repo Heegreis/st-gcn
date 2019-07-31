@@ -90,13 +90,14 @@ class REC_Processor(Processor):
                 param_group['lr'] = lr
             self.lr_autoencoder = lr
 
-    def show_topk(self, k, writer):
+    def show_topk(self, k, writer=None):
         rank = self.result.argsort()
         hit_top_k = [l in rank[i, -k:] for i, l in enumerate(self.label)]
         accuracy = sum(hit_top_k) * 1.0 / len(hit_top_k)
 
         # tensorbordX
-        writer.add_scalar('accuracy Top{}'.format(k), accuracy, self.meta_info['iter'])
+        if writer != None:
+            writer.add_scalar('accuracy Top{}'.format(k), accuracy, self.meta_info['iter'])
 
         self.io.print_log('\tTop{}: {:.2f}%'.format(k, 100 * accuracy))
 
@@ -190,7 +191,7 @@ class REC_Processor(Processor):
             self.show_epoch_info()
             self.io.print_timer()
 
-    def test(self, writer, evaluation=True):
+    def test(self, writer=None, evaluation=True):
 
         self.model.eval()
         loader = self.data_loader['test']
@@ -215,7 +216,8 @@ class REC_Processor(Processor):
                 loss_value.append(loss.item())
                 label_frag.append(label.data.cpu().numpy())
                 ## tensorbordX
-                writer.add_scalar('Test_Loss', loss, self.meta_info['iter'])
+                if writer != None:
+                    writer.add_scalar('Test_Loss', loss, self.meta_info['iter'])
 
         self.result = np.concatenate(result_frag)
         if evaluation:
