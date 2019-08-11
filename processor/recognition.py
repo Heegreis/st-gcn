@@ -43,7 +43,7 @@ class REC_Processor(Processor):
         self.model.apply(weights_init)
         self.loss = nn.CrossEntropyLoss()
 
-        if self.arg.model == "net.st_gcn_AE.Model":
+        if self.arg.model == "net.st_gcn_AE.Model" or self.arg.model == "net.st_gcn_AE_Upsample.Model":
             self.loss_autoencoder = nn.MSELoss()
             # self.loss_autoencoder = nn.BCELoss()
         
@@ -62,7 +62,7 @@ class REC_Processor(Processor):
                 weight_decay=self.arg.weight_decay)
         else:
             raise ValueError()
-        if self.arg.model == "net.st_gcn_AE.Model":
+        if self.arg.model == "net.st_gcn_AE.Model" or self.arg.model == "net.st_gcn_AE_Upsample.Model":
             # self.optimizer_autoencoder = optim.Adam(
             #     self.model.autoencoder.parameters(),
             #     lr=self.arg.base_lr,
@@ -83,7 +83,7 @@ class REC_Processor(Processor):
             self.lr = lr
         else:
             self.lr = self.arg.base_lr
-        if self.arg.model == "net.st_gcn_AE.Model":
+        if self.arg.model == "net.st_gcn_AE.Model" or self.arg.model == "net.st_gcn_AE_Upsample.Model":
             lr = self.arg.base_lr * (
                 0.1**np.sum(self.meta_info['epoch']>= np.array(self.arg.step)))
             for param_group in self.optimizer_autoencoder.param_groups:
@@ -101,7 +101,7 @@ class REC_Processor(Processor):
         self.io.print_log('\tTop{}: {:.2f}%'.format(k, 100 * accuracy))
 
     def train(self, writer):
-        if self.arg.model == "net.st_gcn_AE.Model":
+        if self.arg.model == "net.st_gcn_AE.Model" or self.arg.model == "net.st_gcn_AE_Upsample.Model":
             self.model.autoencoder.train()
             self.model.train()
             self.adjust_lr()
@@ -166,7 +166,7 @@ class REC_Processor(Processor):
                 label = label.long().to(self.dev)
 
                 # forward
-                output = self.model(data, writer, self.meta_info['iter'])
+                output = self.model(data)
                 loss = self.loss(output, label)
 
                 # backward
