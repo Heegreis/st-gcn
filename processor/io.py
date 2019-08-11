@@ -77,7 +77,7 @@ class IO():
     def gpu(self):
         # move modules to gpu
         self.model = self.model.to(self.dev)
-        if self.arg.model == "net.st_gcn_AE.Model" or self.arg.model == "net.st_gcn_AE_Upsample.Model":
+        if self.arg.model == "net.st_gcn_AE.Model" or self.arg.model == "net.st_gcn_AE_Upsample.Model" or self.arg.model == "net.st_gcn_AE_128.Model":
             self.model.autoencoder = self.model.autoencoder.to(self.dev)
             self.model.encoder = self.model.encoder.to(self.dev)
             self.model.decoder = self.model.decoder.to(self.dev)
@@ -89,7 +89,7 @@ class IO():
         # model parallel
         if self.arg.use_gpu and len(self.gpus) > 1:
             self.model = nn.DataParallel(self.model, device_ids=self.gpus)
-            if self.arg.model == "net.st_gcn_AE.Model" or self.arg.model == "net.st_gcn_AE_Upsample.Model":
+            if self.arg.model == "net.st_gcn_AE.Model" or self.arg.model == "net.st_gcn_AE_Upsample.Model" or self.arg.model == "net.st_gcn_AE_128.Model":
                 self.model.autoencoder = nn.DataParallel(self.model.module.autoencoder, device_ids=self.gpus)
                 self.model.encoder = nn.DataParallel(self.model.module.encoder, device_ids=self.gpus)
                 self.model.decoder = nn.DataParallel(self.model.module.decoder, device_ids=self.gpus)
