@@ -166,7 +166,7 @@ class REC_Processor(Processor):
                 label = label.long().to(self.dev)
 
                 # forward
-                output = self.model(data)
+                output = self.model(data, writer, self.meta_info['iter'])
                 loss = self.loss(output, label)
 
                 # backward
