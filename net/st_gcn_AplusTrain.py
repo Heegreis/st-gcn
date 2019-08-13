@@ -41,6 +41,9 @@ class Model(nn.Module):
         if Aplus_init == 'zeros':
             # Aplus: zeros init
             Aplus = torch.zeros(self.A[0].size())
+        elif Aplus_init == 'ones':
+            # Aplus: ones init
+            Aplus = torch.ones(self.A[0].size())
         elif Aplus_init == 'eye':
             # Aplus: eye init
             A_level = list(self.A[0].size())[0]
@@ -74,7 +77,7 @@ class Model(nn.Module):
         # initialize parameters for edge importance weighting
         if edge_importance_weighting:
             self.edge_importance = nn.ParameterList([
-                nn.Parameter(torch.zeros(self.A.size()))
+                nn.Parameter(torch.ones(self.A.size()))
                 for i in self.st_gcn_networks
             ])
         else:
