@@ -63,23 +63,10 @@ class ConvTemporalGraphical(nn.Module):
         n, c, t, v = x.size()
         o, k, v, w = A.size()
 
-        yo_list = []
-
-        for index_o in range(0, o):
-            Ao = A[index_o, :, :, :]
-            for index_c in range(0, c):
-                xc = x[:, index_c, :, :]  # n, t, v
-                yc = torch.einsum('ntv,kvw->nktw', (xc, Ao))
-                # sum k
-                yck = yc[:, 0, :, :]
-                for index_k in range(1, k):
-                    yck =  yck.add(yc[:, index_k, :, :])
-                yc = yck # n, t, w
-                if index_c == 0:
-                    yc_tmp = yc
-                else:
-                    yc_tmp.add(yc)
-            yo_list.append(yc_tmp)
-        y = torch.stack(yo_list, dim=1) # n, o, t, w = n, c, t, v
+        
+        y = torch.einsum('nctv,okvw->nocktw', (x, A))   # n, o, c, k, t, w
+        y = torch.sum(y, 3) # n, o, c, t, w
+        y = torch.sum(y, 2) # n, o, t, w
+        
 
         return y, A
