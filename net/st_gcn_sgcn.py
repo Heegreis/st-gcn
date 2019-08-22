@@ -69,7 +69,7 @@ class Model(nn.Module):
 
             k, v, w = self.A.size()
             self.edge_importance = nn.ParameterList([
-                nn.Parameter(torch.ones(st_gcn.out_channels, k, v, w))
+                nn.Parameter(torch.ones(st_gcn.in_channels, k, v, w))
                 for st_gcn in self.st_gcn_networks
             ])
         else:
@@ -172,7 +172,7 @@ class st_gcn(nn.Module):
                  residual=True):
         super().__init__()
 
-        self.out_channels = out_channels
+        self.in_channels = in_channels
 
         assert len(kernel_size) == 2
         assert kernel_size[0] % 2 == 1

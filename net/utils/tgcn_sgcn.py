@@ -53,6 +53,14 @@ class ConvTemporalGraphical(nn.Module):
             stride=(t_stride, 1),
             dilation=(t_dilation, 1),
             bias=bias)
+        self.oneConv = nn.Conv2d(
+            in_channels,
+            out_channels,
+            kernel_size=(t_kernel_size, 1),
+            padding=(t_padding, 0),
+            stride=(t_stride, 1),
+            dilation=(t_dilation, 1),
+            bias=bias)
 
     def forward(self, x, A, importance):
         A_list = []
@@ -61,12 +69,14 @@ class ConvTemporalGraphical(nn.Module):
         A = torch.stack(A_list, dim=0)
 
         n, c, t, v = x.size()
-        o, k, v, w = A.size()
+        C, k, v, w = A.size()
 
-        
-        y = torch.einsum('nctv,okvw->nocktw', (x, A))   # n, o, c, k, t, w
-        y = torch.sum(y, 3) # n, o, c, t, w
-        y = torch.sum(y, 2) # n, o, t, w
+        # d is C
+        y = torch.einsum('nctv,dkvw->ndcktw', (x, A))   # n, C, c, k, t, w
+        y = torch.sum(y, 3) # n, C, c, t, w
+        y = torch.sum(y, 2) # n, C, t, w
+
+        y = self.oneConv(y) # n, o, t, w
         
 
         return y, A
