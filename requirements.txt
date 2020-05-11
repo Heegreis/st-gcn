@@ -2,8 +2,8 @@ pyyaml
 argparse
 numpy
 h5py
-opencv-python
+# opencv-python
 imageio
 scikit-video
-torch
-torchvision
+torch==1.2.0 -f https://download.pytorch.org/whl/torch_stable.html
+torchvision==0.4.0 -f https://download.pytorch.org/whl/torch_stable.html
