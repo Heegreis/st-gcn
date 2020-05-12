@@ -27,6 +27,14 @@ params = dict(model_folder='./models', model_pose='COCO')
 opWrapper.configure(params)
 opWrapper.start()
 
+def get_label_name():
+    label_name_path = 'resource/custom_dataset/label_name.txt'
+    label_name = []
+    with open(label_name_path) as f:
+        label_name = f.readlines()
+        label_name = [line.rstrip() for line in label_name]
+    return label_name
+
 def get_video_WH(video_path):
     capture = cv2.VideoCapture(video_path)
     W, H = 0, 0
@@ -39,7 +47,6 @@ def get_video_WH(video_path):
                 W, H = 256 * source_W // source_H, 256
                 break
     capture.release()
-    print(W, H)
     return W, H
 
 def getRectFromSkeleton(poseData):
@@ -62,27 +69,24 @@ def getRectFromSkeleton(poseData):
     return min_x, min_y, max_x, max_y
 
 def videp_process(video_path, label, output_path):
+    write_video = False
     video_name = video_path.split('/')[-1].split('.')[0]
-
-    label_name_path = './resource/kinetics_skeleton/label_name.txt'
-    with open(label_name_path) as f:
-        label_name = f.readlines()
-        label_name = [line.rstrip() for line in label_name]
 
     width, height = get_video_WH(video_path)
     video_capture = cv2.VideoCapture(video_path)
     video_output_path = os.path.join(output_path, 'videos', label, video_name + '.avi')
     fourcc = cv2.VideoWriter_fourcc(*'XVID')
     print(video_name)
-    out = cv2.VideoWriter(video_output_path, fourcc, 30, (width, height))
+    if write_video:
+        out = cv2.VideoWriter(video_output_path, fourcc, 30, (width, height))
 
     # start recognition
     start_time = time.time()
     frame_index = 0
 
     json_data = {
-        "label": "balloon blowing",
-        "label_index": 12
+        "label": label,
+        "label_index": get_label_name().index(label)
     }
     openpose_data = []
 
@@ -115,12 +119,13 @@ def videp_process(video_path, label, output_path):
             openpose_data.append(frame_data)
             continue
         # drow skeleton on img
-        frameToView = orig_image
-        for person in multi_pose:
-            min_x, min_y, max_x, max_y = getRectFromSkeleton(person)
-            cv2.rectangle(frameToView, (int(min_x), int(min_y)),
-                          (int(max_x), int(max_y)), (255, 0, 0), 2)
-        out.write(frameToView)
+        if write_video:
+            frameToView = orig_image
+            for person in multi_pose:
+                min_x, min_y, max_x, max_y = getRectFromSkeleton(person)
+                cv2.rectangle(frameToView, (int(min_x), int(min_y)),
+                            (int(max_x), int(max_y)), (255, 0, 0), 2)
+            out.write(frameToView)
 
         # normalization
         multi_pose[:, :, 0] = multi_pose[:, :, 0]/W
@@ -152,7 +157,8 @@ def videp_process(video_path, label, output_path):
         f.close()
 
     video_capture.release()
-    out.release()
+    if write_video:
+        out.release()
 
 def mkdirs(out_videos_path, labels):
     videos_path = os.path.join(out_videos_path, 'videos')
@@ -170,6 +176,7 @@ def loop_dir():
     # dataset_path = 'dataset/row_video_for_train'
     dataset_path = 'dataset/test_row_video_for_train'
     output_path = 'dataset/test/custom_skeleten_data'
+    # output_path = 'dataset/custom_skeleten_data/noSplitPerson'
 
     dirs = os.listdir(dataset_path) # label name
     mkdirs(output_path, dirs)
@@ -184,3 +191,4 @@ def loop_dir():
 
 if __name__ == "__main__":
     loop_dir()
+    
