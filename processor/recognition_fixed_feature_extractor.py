@@ -42,6 +42,9 @@ class REC_Processor(Processor):
                                         **(self.arg.ori_model_args))
         weights_path = './models/st_gcn.kinetics.pt'
         model_ft = self.io.load_weights(self.model, weights_path)
+        for param in model_ft.parameters():
+            param.requires_grad = False
+        # Parameters of newly constructed modules have requires_grad=True by default
         model_ft.fcn = nn.Conv2d(256, self.arg.model_args['num_class'], kernel_size=1)
         self.model = model_ft
         self.model = self.model.to(self.dev)
