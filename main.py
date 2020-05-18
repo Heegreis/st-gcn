@@ -18,6 +18,7 @@ if __name__ == '__main__':
     processors['demo_old'] = import_class('processor.demo_old.Demo')
     processors['demo'] = import_class('processor.demo_realtime.DemoRealtime')
     processors['demo_offline'] = import_class('processor.demo_offline.DemoOffline')
+    processors['demo_custom'] = import_class('processor.demo_realtime_custom.DemoRealtime')
     #endregion yapf: enable
 
     # add sub-parser
