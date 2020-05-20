@@ -1,3 +1,5 @@
+import numpy as np
+
 class naive_pose_tracker():
     """ A simple tracker for recording person poses and generating skeleton sequences.
     For actual occasion, I recommend you to implement a robuster tracker.

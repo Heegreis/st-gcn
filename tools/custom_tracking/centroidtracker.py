@@ -40,39 +40,29 @@ class CentroidTracker:
         del self.disappeared[objectID]
 
     def getRectFromSkeleton(self, poseData):
-        if poseData['Neck'][2] != 0 and poseData['Nose'][2] != 0:
-            d_x = poseData['Neck'][0] - poseData['Nose'][0]
-            d_y = poseData['Neck'][1] - poseData['Nose'][1]
-            radius = math.sqrt(d_x**2 + d_y**2)
-            center_x = poseData['Nose'][0]
-            center_y = poseData['Nose'][1]
-            poseData['face_top'] = ((center_x), (center_y - radius), 1.0)
-            poseData['face_down'] = ((center_x), (center_y + radius), 1.0)
-            poseData['face_left'] = ((center_x - radius), (center_y), 1.0)
-            poseData['face_right'] = ((center_x + radius), (center_y), 1.0)
         first = True
-        for _, value in poseData.items():
-            if value[2] != 0:
+        for keypoint in poseData:
+            if keypoint[2] != 0:
                 if first:
-                    max_x, min_x = value[0], value[0]
-                    max_y, min_y = value[1], value[1]
+                    max_x, min_x = keypoint[0], keypoint[0]
+                    max_y, min_y = keypoint[1], keypoint[1]
                     first = False
                 else:
-                    if value[0] > max_x:
-                        max_x = value[0]
-                    if value[0] < min_x:
-                        min_x = value[0]
-                    if value[1] > max_y:
-                        max_y = value[1]
-                    if value[1] < min_y:
-                        min_y = value[1]
-        return (min_x, min_y, max_x, max_y)
+                    if keypoint[0] > max_x:
+                        max_x = keypoint[0]
+                    if keypoint[0] < min_x:
+                        min_x = keypoint[0]
+                    if keypoint[1] > max_y:
+                        max_y = keypoint[1]
+                    if keypoint[1] < min_y:
+                        min_y = keypoint[1]
+        return min_x, min_y, max_x, max_y
 
-    def update(self, rects):
+    def update(self, multi_pose):
         """更新objects的ID
         
         Args:
-            rects (list): 新的關鍵點資料
+            multi_pose (list): 新的關鍵點資料
         
         Returns:
             OrderedDict: 新的objects資料，(人物ID, [人物中心x座標, 人物中心y座標, 對應的關節資料索引])))
@@ -80,7 +70,7 @@ class CentroidTracker:
 
         # check to see if the list of input bounding box rectangles
         # is empty
-        if len(rects) == 0:
+        if len(multi_pose) == 0:
             # loop over any existing tracked objects and mark them
             # as disappeared
             for objectID in list(self.disappeared.keys()):
@@ -98,21 +88,22 @@ class CentroidTracker:
             return self.objects
 
         # initialize an array of input centroids for the current frame
-        inputCentroids = np.zeros((len(rects), 3), dtype="int")
+        inputCentroids = np.zeros((len(multi_pose), 3), dtype="int")
 
         # loop over the bounding box rectangles
-        for (i, (poseData, pose_index)) in enumerate(rects):
+        for pose_index, poseData in enumerate(multi_pose):
             # use the bounding box coordinates to derive the centroid
-            if poseData['Neck'][2] != 0:
-                startX = int(poseData['Neck'][0])
-                startY = int(poseData['Neck'][1])
-                endX = int(poseData['Neck'][0])
-                endY = int(poseData['Neck'][1])
-            else:
-                startX, startY, endX, endY = self.getRectFromSkeleton(poseData)
+            # if poseData['Neck'][2] != 0:
+            #     startX = int(poseData['Neck'][0])
+            #     startY = int(poseData['Neck'][1])
+            #     endX = int(poseData['Neck'][0])
+            #     endY = int(poseData['Neck'][1])
+            # else:
+            #     startX, startY, endX, endY = self.getRectFromSkeleton(poseData)
+            startX, startY, endX, endY = self.getRectFromSkeleton(poseData)
             cX = int((startX + endX) / 2.0)
             cY = int((startY + endY) / 2.0)
-            inputCentroids[i] = (cX, cY, pose_index)
+            inputCentroids[pose_index] = (cX, cY, pose_index)
 
         # if we are currently not tracking any objects take the input
         # centroids and register each of them

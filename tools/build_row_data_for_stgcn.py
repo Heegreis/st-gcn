@@ -10,6 +10,10 @@ import numpy as np
 
 import cv2
 
+# from tools.naive_pose_tracker import naive_pose_tracker
+from custom_tracking.centroidtracker import CentroidTracker
+
+
 openpose_path = '/openpose/build'
 # load openpose python api
 if openpose_path is not None:
@@ -68,8 +72,7 @@ def getRectFromSkeleton(poseData):
                     min_y = keypoint[1]
     return min_x, min_y, max_x, max_y
 
-def videp_process(video_path, label, output_path):
-    write_video = False
+def videp_process(video_path, label, output_path, write_video, add_id):
     video_name = video_path.split('/')[-1].split('.')[0]
 
     width, height = get_video_WH(video_path)
@@ -89,6 +92,9 @@ def videp_process(video_path, label, output_path):
         "label_index": get_label_name().index(label)
     }
     openpose_data = []
+
+    # 實例化人物追蹤器
+    centroidTracker = CentroidTracker(maxDisappeared=40 / 5, maxDistance=200)
 
     while(True):
         frame_index += 1
@@ -118,13 +124,27 @@ def videp_process(video_path, label, output_path):
             frame_data['skeleton'] = skeletons
             openpose_data.append(frame_data)
             continue
+        
+        # tracking people
+        objects = centroidTracker.update(multi_pose)  # 用追蹤器更新人物ID
+        
         # drow skeleton on img
         if write_video:
             frameToView = orig_image
-            for person in multi_pose:
-                min_x, min_y, max_x, max_y = getRectFromSkeleton(person)
+            # for person in multi_pose:
+            #     min_x, min_y, max_x, max_y = getRectFromSkeleton(person)
+            #     cv2.rectangle(frameToView, (int(min_x), int(min_y)),
+            #                 (int(max_x), int(max_y)), (255, 0, 0), 2)
+            for (people_id, centroid) in objects.items():
+                poseIndex = centroid[2]
+                if poseIndex < len(multi_pose):
+                    poseKeypoint = multi_pose[poseIndex]
+                min_x, min_y, max_x, max_y = getRectFromSkeleton(poseKeypoint)
                 cv2.rectangle(frameToView, (int(min_x), int(min_y)),
                             (int(max_x), int(max_y)), (255, 0, 0), 2)
+                cv2.putText(frameToView, str(people_id),
+                            (int(centroid[0]), int(centroid[1])), 0,
+                            5e-3 * 200, (0, 255, 0), 2)
             out.write(frameToView)
 
         # normalization
@@ -133,7 +153,11 @@ def videp_process(video_path, label, output_path):
         multi_pose[:, :, 0][multi_pose[:, :, 2] == 0] = 0
         multi_pose[:, :, 1][multi_pose[:, :, 2] == 0] = 0
 
-        for person in multi_pose:
+        # for person in multi_pose:
+        for (people_id, centroid) in objects.items():
+            poseIndex = centroid[2]
+            if poseIndex < len(multi_pose):
+                person = multi_pose[poseIndex]
             score, coordinates = [], []
             skeleton = {}
             for i in range(0, len(person)):
@@ -144,6 +168,8 @@ def videp_process(video_path, label, output_path):
                 score += [round(keypoint[2].item(), 3)]
             skeleton['pose'] = coordinates
             skeleton['score'] = score
+            if add_id:
+                skeleton['id'] = people_id
             skeletons += [skeleton]
 
         frame_data['skeleton'] = skeletons
@@ -178,6 +204,9 @@ def loop_dir():
     output_path = 'dataset/test/custom_skeleten_data'
     # output_path = 'dataset/custom_skeleten_data/noSplitPerson'
 
+    write_video = True
+    add_id = True
+
     dirs = os.listdir(dataset_path) # label name
     mkdirs(output_path, dirs)
     # 输出所有文件和文件夹
@@ -187,7 +216,7 @@ def loop_dir():
         files = os.listdir(class_path)
         for file_name in files:
             video_path = os.path.join(class_path, file_name)
-            videp_process(video_path, label, output_path)
+            videp_process(video_path, label, output_path, write_video, add_id)
 
 if __name__ == "__main__":
     loop_dir()
