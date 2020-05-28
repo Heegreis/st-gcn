@@ -6,6 +6,7 @@ def stgcn_visualize(pose,
                     edge,
                     feature,
                     video,
+                    out_custom_demo,
                     label=None,
                     label_sequence=None,
                     height=1080,
@@ -22,6 +23,9 @@ def stgcn_visualize(pose,
         frame = cv2.resize(frame, (height * W // H // 2, height//2))
         H, W, c = frame.shape
         scale_factor = 2 * height / 1080
+
+        if not out_custom_demo is None:
+            frame_custom_demo = frame
 
         # draw skeleton
         skeleton = frame * 0
@@ -64,9 +68,22 @@ def stgcn_visualize(pose,
                 new_x = int(pos_track[m][0] + (pos[0] - pos_track[m][0]) * 0.2)
                 new_y = int(pos_track[m][1] + (pos[1] - pos_track[m][1]) * 0.2)
                 pos_track[m] = (new_x, new_y)
-            cv2.putText(text, body_label, pos_track[m],
+            # cv2.putText(text, body_label, pos_track[m],
+            #             cv2.FONT_HERSHEY_TRIPLEX, 0.5 * scale_factor,
+            #             (255, 255, 255))
+            cv2.putText(text, body_label, (pos_track[m][0] + 0, pos_track[m][1] + 100),
                         cv2.FONT_HERSHEY_TRIPLEX, 0.5 * scale_factor,
-                        (255, 255, 255))
+                        (255, 0, 255))
+
+            if not out_custom_demo is None:
+                cv2.putText(frame_custom_demo, body_label, (pos_track[m][0] + 0, pos_track[m][1] + 100),
+                            cv2.FONT_HERSHEY_TRIPLEX, 0.5,
+                            (255, 0, 255))
+
+        if not out_custom_demo is None:
+            frame_custom_demo = cv2.resize(frame_custom_demo, (960, 720))
+            out_custom_demo.write(frame_custom_demo)
+            cv2.imshow('stream', frame_custom_demo)
 
         # generate mask
         mask = frame * 0

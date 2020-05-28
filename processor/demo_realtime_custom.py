@@ -30,6 +30,24 @@ class DemoRealtime(IO):
     """
 
     def start(self):
+        # 自訂參數
+        write_stgcn_video = True
+        stgcn_imshow = False
+        write_custom_video = True # True imshow
+
+        if write_stgcn_video or write_custom_video:
+            fps = 30
+            fourcc = cv2.VideoWriter_fourcc(*'XVID')
+            video_name = self.arg.video.split('/')[-1].split('.')[0]
+            if write_stgcn_video:
+                out = cv2.VideoWriter('data/mydata/test_output/' + video_name + '.avi', fourcc, fps, (960, 720))
+            else:
+                out = None
+            if write_custom_video:
+                out_custom_demo = cv2.VideoWriter('data/mydata/test_output_custom_demo/' + video_name + '.avi', fourcc, fps, (960, 720))
+            else:
+                out_custom_demo = None
+
         # load openpose python api
         if self.arg.openpose is not None:
             sys.path.append('{}/python'.format(self.arg.openpose))
@@ -40,7 +58,6 @@ class DemoRealtime(IO):
             print('Can not find Openpose Python API.')
             return
 
-        video_name = self.arg.video.split('/')[-1].split('.')[0]
         label_name_path = './resource/custom_dataset/label_name.txt'
         with open(label_name_path) as f:
             label_name = f.readlines()
@@ -57,6 +74,9 @@ class DemoRealtime(IO):
 
         if self.arg.video == 'camera_source':
             video_capture = cv2.VideoCapture(0)
+        elif self.arg.video == 'ip_camera':
+            video_path = 'rtsp://admin:admin@192.168.1.245:554/channel1'
+            video_capture = cv2.VideoCapture(video_path)
         else:
             video_capture = cv2.VideoCapture(self.arg.video)
 
@@ -92,8 +112,8 @@ class DemoRealtime(IO):
             multi_pose[:, :, 1][multi_pose[:, :, 2] == 0] = 0
 
             # pose tracking
-            if self.arg.video == 'camera_source':
-                frame_index = int((time.time() - start_time)*self.arg.fps)
+            if self.arg.video == 'camera_source' or self.arg.video == 'ip_camera':
+                frame_index = int((time.time() - start_time)*self.arg.camera_fps)
             else:
                 frame_index += 1
             pose_tracker.update(multi_pose, frame_index)
@@ -109,8 +129,13 @@ class DemoRealtime(IO):
             # visualization
             app_fps = 1 / (time.time() - tic)
             image = self.render(data_numpy, voting_label_name,
-                                video_label_name, intensity, orig_image, app_fps)
-            cv2.imshow("ST-GCN", image)
+                                video_label_name, intensity, orig_image, out_custom_demo, app_fps)
+            if stgcn_imshow:
+                cv2.imshow("ST-GCN", image)
+            if write_stgcn_video:
+                image_save = cv2.resize(image, (960, 720))
+                out.write(image_save)
+
             if cv2.waitKey(1) & 0xFF == ord('q'):
                 break
 
@@ -147,11 +172,12 @@ class DemoRealtime(IO):
             video_label_name.append(frame_label_name)
         return voting_label_name, video_label_name, output, intensity
 
-    def render(self, data_numpy, voting_label_name, video_label_name, intensity, orig_image, fps=0):
+    def render(self, data_numpy, voting_label_name, video_label_name, intensity, orig_image, out_custom_demo, fps=0):
         images = utils.visualization.stgcn_visualize(
             data_numpy[:, [-1]],
             self.model.graph.edge,
             intensity[[-1]], [orig_image],
+            out_custom_demo,
             voting_label_name,
             [video_label_name[-1]],
             self.arg.height,
@@ -181,6 +207,9 @@ class DemoRealtime(IO):
                             default=128,
                             type=int)
         parser.add_argument('--model_fps',
+                            default=30,
+                            type=int)
+        parser.add_argument('--camera_fps',
                             default=30,
                             type=int)
         parser.add_argument('--height',
