@@ -71,11 +71,13 @@ def loop_dir(json_dir_path, name_list_dir_path, out_json_dir_path):
 
 
 if __name__ == "__main__":
-    # json_dir_path = 'dataset/custom_skeleten_data/noSplitPerson/poses'
-    # out_label_json_dir_path = 'dataset/custom_skeleten_data/noSplitPerson'
-    json_dir_path = 'dataset/test/custom_skeleten_data/poses'
-    out_json_dir_path = 'dataset/test/custom_skeleten_data/new_poses'
-    out_name_list_dir_path = 'dataset/test/custom_skeleten_data'
+    # json_dir_path = 'dataset/test/custom_skeleten_data/poses'
+    # out_json_dir_path = 'dataset/test/custom_skeleten_data/new_poses'
+    # out_name_list_dir_path = 'dataset/test/custom_skeleten_data'
+
+    json_dir_path = 'dataset/custom_skeleten_data/forSplitPerson_with_ID/poses'
+    out_json_dir_path = 'dataset/custom_skeleten_data/forSplitPerson_with_ID/new_poses'
+    out_name_list_dir_path = 'dataset/custom_skeleten_data/forSplitPerson_with_ID'
 
     loop_dir(json_dir_path, out_name_list_dir_path, out_json_dir_path)
     # loop_dir_for_get_all_file_name(json_dir_path, out_name_list_dir_path)

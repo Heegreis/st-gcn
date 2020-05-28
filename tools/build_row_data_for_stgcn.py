@@ -72,7 +72,7 @@ def getRectFromSkeleton(poseData):
                     min_y = keypoint[1]
     return min_x, min_y, max_x, max_y
 
-def videp_process(video_path, label, output_path, write_video, add_id):
+def video_process(video_path, label, output_path, write_video, add_id):
     video_name = video_path.split('/')[-1].split('.')[0]
 
     width, height = get_video_WH(video_path)
@@ -199,10 +199,14 @@ def mkdirs(out_videos_path, labels):
             os.makedirs(pose_label_path)
 
 def loop_dir():
+    # dataset_path = 'dataset/test_row_video_for_train'
+    # output_path = 'dataset/test/custom_skeleten_data'
+
     # dataset_path = 'dataset/row_video_for_train'
-    dataset_path = 'dataset/test_row_video_for_train'
-    output_path = 'dataset/test/custom_skeleten_data'
     # output_path = 'dataset/custom_skeleten_data/noSplitPerson'
+
+    dataset_path = 'dataset/row_video_for_train'
+    output_path = 'dataset/custom_skeleten_data/forSplitPerson'
 
     write_video = True
     add_id = True
@@ -216,7 +220,7 @@ def loop_dir():
         files = os.listdir(class_path)
         for file_name in files:
             video_path = os.path.join(class_path, file_name)
-            videp_process(video_path, label, output_path, write_video, add_id)
+            video_process(video_path, label, output_path, write_video, add_id)
 
 if __name__ == "__main__":
     loop_dir()

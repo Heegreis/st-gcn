@@ -43,8 +43,13 @@ def loop_dir(json_dir_path, out_label_json_dir_path):
 
 
 if __name__ == "__main__":
-    json_dir_path = 'dataset/custom_skeleten_data/noSplitPerson/poses'
-    out_label_json_dir_path = 'dataset/custom_skeleten_data/noSplitPerson'
     # json_dir_path = 'dataset/test/custom_skeleten_data/poses'
     # out_label_json_dir_path = 'dataset/test/custom_skeleten_data'
+
+    # json_dir_path = 'dataset/custom_skeleten_data/noSplitPerson/poses'
+    # out_label_json_dir_path = 'dataset/custom_skeleten_data/noSplitPerson'
+
+    json_dir_path = 'dataset/custom_skeleten_data/splitPerson/poses'
+    out_label_json_dir_path = 'dataset/custom_skeleten_data/splitPerson'
+
     loop_dir(json_dir_path, out_label_json_dir_path)

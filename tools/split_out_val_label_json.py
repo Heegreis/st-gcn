@@ -34,6 +34,9 @@ def loop_dir(train_json_path, dir_path, val_json_path):
 
 
 if __name__ == "__main__":
+    '''
+    先拉出來val的pose json，用該程式生成kinetics_val_label.json
+    '''
     train_json_path = 'dataset/custom_skeleten_data/noSplitPerson_train_val/kinetics_train_label.json'
     val_dir_path = 'dataset/custom_skeleten_data/noSplitPerson_train_val/kinetics_val'
     val_json_path = 'dataset/custom_skeleten_data/noSplitPerson_train_val/kinetics_val_label.json'
