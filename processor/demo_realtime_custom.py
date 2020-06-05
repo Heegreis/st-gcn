@@ -40,11 +40,11 @@ class DemoRealtime(IO):
             fourcc = cv2.VideoWriter_fourcc(*'XVID')
             video_name = self.arg.video.split('/')[-1].split('.')[0]
             if write_stgcn_video:
-                out = cv2.VideoWriter('data/mydata/test_output/' + video_name + '.avi', fourcc, fps, (960, 720))
+                out = cv2.VideoWriter('data/mydata/test_output/' + video_name + '.avi', fourcc, fps, (1918, 1080))
             else:
                 out = None
             if write_custom_video:
-                out_custom_demo = cv2.VideoWriter('data/mydata/test_output_custom_demo/' + video_name + '.avi', fourcc, fps, (960, 720))
+                out_custom_demo = cv2.VideoWriter('data/mydata/test_output_custom_demo/' + video_name + '.avi', fourcc, fps, (1920, 1080))
             else:
                 out_custom_demo = None
 
@@ -91,6 +91,10 @@ class DemoRealtime(IO):
             ret, orig_image = video_capture.read()
             if orig_image is None:
                 break
+            if write_custom_video:
+                orig_image_for_show = orig_image
+            else:
+                orig_image_for_show = None
             source_H, source_W, _ = orig_image.shape
             orig_image = cv2.resize(
                 orig_image, (256 * source_W // source_H, 256))
@@ -129,12 +133,12 @@ class DemoRealtime(IO):
             # visualization
             app_fps = 1 / (time.time() - tic)
             image = self.render(data_numpy, voting_label_name,
-                                video_label_name, intensity, orig_image, out_custom_demo, app_fps)
+                                video_label_name, intensity, orig_image, orig_image_for_show, out_custom_demo, app_fps)
             if stgcn_imshow:
                 cv2.imshow("ST-GCN", image)
             if write_stgcn_video:
-                image_save = cv2.resize(image, (960, 720))
-                out.write(image_save)
+                # image = cv2.resize(image, (1918, 1080))
+                out.write(image)
 
             if cv2.waitKey(1) & 0xFF == ord('q'):
                 break
@@ -172,11 +176,12 @@ class DemoRealtime(IO):
             video_label_name.append(frame_label_name)
         return voting_label_name, video_label_name, output, intensity
 
-    def render(self, data_numpy, voting_label_name, video_label_name, intensity, orig_image, out_custom_demo, fps=0):
+    def render(self, data_numpy, voting_label_name, video_label_name, intensity, orig_image, orig_image_for_show, out_custom_demo, fps=0):
         images = utils.visualization.stgcn_visualize(
             data_numpy[:, [-1]],
             self.model.graph.edge,
             intensity[[-1]], [orig_image],
+            orig_image_for_show,
             out_custom_demo,
             voting_label_name,
             [video_label_name[-1]],
