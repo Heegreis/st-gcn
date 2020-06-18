@@ -8,6 +8,8 @@ def stgcn_visualize(pose,
                     video,
                     orig_image_for_show,
                     out_custom_demo,
+                    frame_index,
+                    sheet,
                     label=None,
                     label_sequence=None,
                     height=1080,
@@ -27,6 +29,8 @@ def stgcn_visualize(pose,
 
         if not out_custom_demo is None:
             frame_custom_demo = orig_image_for_show
+            # scale_factor_custom = 1080 // frame_custom_demo.shape[0]
+            scale_factor_custom = 2 * frame_custom_demo.shape[0] / 1080
 
         # draw skeleton
         skeleton = frame * 0
@@ -53,7 +57,10 @@ def stgcn_visualize(pose,
                          int(np.ceil(2 * scale_factor)))
 
             if label_sequence is not None:
-                body_label = label_sequence[t // 4][m]
+                label_count = {'nature': 0, 'fall': 0, 'kick': 0, 'punch': 0}
+                for i in range(4):
+                    label_count[label_sequence[i][m]] = label_count[label_sequence[i][m]] + 1
+                body_label = max(label_count, key=label_count.get)
             else:
                 body_label = ''
             x_nose = int((pose[0, t, 0, m] + 0.5) * W)
@@ -75,18 +82,32 @@ def stgcn_visualize(pose,
             cv2.putText(text, body_label, (pos_track[m][0] + 0, pos_track[m][1] + 100),
                         cv2.FONT_HERSHEY_TRIPLEX, 0.5 * scale_factor,
                         (255, 0, 255))
+            cv2.putText(text, str(m + 1), (pos_track[m][0] - 20, pos_track[m][1] + 100),
+                        cv2.FONT_HERSHEY_TRIPLEX, 0.5 * scale_factor,
+                        (0, 0, 255))
 
             if not out_custom_demo is None:
-                custom_demo_pos_x = (pos_track[m][0] + 0) * 2
-                custom_demo_pos_y = (pos_track[m][1] + 100) * 2
-                cv2.putText(frame_custom_demo, body_label, (custom_demo_pos_x, custom_demo_pos_y),
+                custom_demo_pos_x = int((pos_track[m][0] + 0) * scale_factor_custom)
+                custom_demo_pos_y = int((pos_track[m][1] + 0) * scale_factor_custom)
+                custom_demo_pos_x_m = int((pos_track[m][0] - 10) * scale_factor_custom)
+                custom_demo_pos_y_m = int((pos_track[m][1] + 0) * scale_factor_custom)
+                # cv2.putText(frame_custom_demo, body_label, (custom_demo_pos_x, custom_demo_pos_y),
+                #             cv2.FONT_HERSHEY_TRIPLEX, 1,
+                #             (255, 0, 255))
+                cv2.putText(frame_custom_demo, str(m + 1), (custom_demo_pos_x_m, custom_demo_pos_y_m),
                             cv2.FONT_HERSHEY_TRIPLEX, 1,
-                            (255, 0, 255))
+                            (255, 0, 0))
+
+            # write excel
+            if frame_index % 15 == 0:  # 每0.5秒在報表紀錄一次動作
+                insertCell = sheet.cell(row=(frame_index // 15) + 2,
+                                        column=m + 2)
+                insertCell.value = body_label
 
         if not out_custom_demo is None:
             out_custom_demo.write(frame_custom_demo)
-            frame_custom_demo = cv2.resize(frame_custom_demo, (1422, 800))
-            cv2.imshow('stream', frame_custom_demo)
+            # frame_custom_demo = cv2.resize(frame_custom_demo, (1422, 800))
+            # cv2.imshow('stream', frame_custom_demo)
 
         # generate mask
         mask = frame * 0

@@ -16,6 +16,8 @@ import tools.utils as utils
 
 import cv2
 
+from openpyxl import Workbook
+
 class DemoRealtime(IO):
     """ A demo for utilizing st-gcn in the realtime action recognition.
     The Openpose python-api is required for this demo.
@@ -31,9 +33,10 @@ class DemoRealtime(IO):
 
     def start(self):
         # 自訂參數
-        write_stgcn_video = True
+        write_stgcn_video = False
         stgcn_imshow = False
         write_custom_video = True # True imshow
+        write_excel = True
 
         if write_stgcn_video or write_custom_video:
             fps = 30
@@ -47,6 +50,12 @@ class DemoRealtime(IO):
                 out_custom_demo = cv2.VideoWriter('data/mydata/test_output_custom_demo/' + video_name + '.avi', fourcc, fps, (1920, 1080))
             else:
                 out_custom_demo = None
+        
+        if write_excel:
+            # 建立excel檔 (報表)
+            wb = Workbook()
+            sheet = wb.active
+            excelSavePath = 'data/mydata/test_output_custom_excel/' + video_name + '.xlsx'
 
         # load openpose python api
         if self.arg.openpose is not None:
@@ -133,7 +142,7 @@ class DemoRealtime(IO):
             # visualization
             app_fps = 1 / (time.time() - tic)
             image = self.render(data_numpy, voting_label_name,
-                                video_label_name, intensity, orig_image, orig_image_for_show, out_custom_demo, app_fps)
+                                video_label_name, intensity, orig_image, orig_image_for_show, out_custom_demo, frame_index, sheet, app_fps)
             if stgcn_imshow:
                 cv2.imshow("ST-GCN", image)
             if write_stgcn_video:
@@ -142,6 +151,16 @@ class DemoRealtime(IO):
 
             if cv2.waitKey(1) & 0xFF == ord('q'):
                 break
+        
+        if write_excel:
+            for col in range(sheet.max_column - 1):
+                insertCell = sheet.cell(row=1, column=col + 2)
+                insertCell.value = 'ID: {}'.format(col + 1)
+            # 在報表左側每一列標上時間，方便觀看
+            for i in range(0, (frame_index // 15) + 1):
+                insertCell = sheet.cell(row=i + 2, column=1)
+                insertCell.value = '{:.1f}秒'.format((i * 0.5))
+            wb.save(excelSavePath)
 
     def predict(self, data):
         # forward
@@ -176,15 +195,18 @@ class DemoRealtime(IO):
             video_label_name.append(frame_label_name)
         return voting_label_name, video_label_name, output, intensity
 
-    def render(self, data_numpy, voting_label_name, video_label_name, intensity, orig_image, orig_image_for_show, out_custom_demo, fps=0):
+    def render(self, data_numpy, voting_label_name, video_label_name, intensity, orig_image, orig_image_for_show, out_custom_demo, frame_index, sheet, fps=0):
+        label_sequence = video_label_name[len(video_label_name) - 4:]
         images = utils.visualization.stgcn_visualize(
             data_numpy[:, [-1]],
             self.model.graph.edge,
             intensity[[-1]], [orig_image],
             orig_image_for_show,
             out_custom_demo,
+            frame_index,
+            sheet,
             voting_label_name,
-            [video_label_name[-1]],
+            label_sequence,
             self.arg.height,
             fps=fps)
         image = next(images)
@@ -250,8 +272,10 @@ class naive_pose_tracker():
         if len(multi_pose.shape) != 3:
             return
 
-        score_order = (-multi_pose[:, :, 2].sum(axis=1)).argsort(axis=0)
-        for p in multi_pose[score_order]:
+        # score_order = (-multi_pose[:, :, 2].sum(axis=1)).argsort(axis=0)
+        # print(score_order)
+        # for p in multi_pose[score_order]:
+        for p in multi_pose:
 
             # match existing traces
             matching_trace = None
