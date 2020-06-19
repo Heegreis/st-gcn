@@ -61,6 +61,9 @@ def stgcn_visualize(pose,
                 for i in range(4):
                     label_count[label_sequence[i][m]] = label_count[label_sequence[i][m]] + 1
                 body_label = max(label_count, key=label_count.get)
+                if not body_label == 'nature':
+                    if label_count[body_label] < 4:
+                        body_label = 'nature'
             else:
                 body_label = ''
             x_nose = int((pose[0, t, 0, m] + 0.5) * W)
@@ -91,9 +94,9 @@ def stgcn_visualize(pose,
                 custom_demo_pos_y = int((pos_track[m][1] + 0) * scale_factor_custom)
                 custom_demo_pos_x_m = int((pos_track[m][0] - 10) * scale_factor_custom)
                 custom_demo_pos_y_m = int((pos_track[m][1] + 0) * scale_factor_custom)
-                # cv2.putText(frame_custom_demo, body_label, (custom_demo_pos_x, custom_demo_pos_y),
-                #             cv2.FONT_HERSHEY_TRIPLEX, 1,
-                #             (255, 0, 255))
+                cv2.putText(frame_custom_demo, body_label, (custom_demo_pos_x, custom_demo_pos_y),
+                            cv2.FONT_HERSHEY_TRIPLEX, 1,
+                            (255, 0, 255))
                 cv2.putText(frame_custom_demo, str(m + 1), (custom_demo_pos_x_m, custom_demo_pos_y_m),
                             cv2.FONT_HERSHEY_TRIPLEX, 1,
                             (255, 0, 0))
