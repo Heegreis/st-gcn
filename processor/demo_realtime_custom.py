@@ -18,6 +18,38 @@ import cv2
 
 from openpyxl import Workbook
 
+from lightOpenPose.lightOpenPose import LightOpenPose
+
+import threading
+
+class ipcamCapture:
+    def __init__(self, URL):
+        self.Frame = []
+        self.status = False
+        self.isstop = False
+        # 攝影機連接。
+        self.capture = cv2.VideoCapture(URL)
+
+    def start(self):
+        # 把程式放進子執行緒，daemon=True 表示該執行緒會隨著主執行緒關閉而關閉。
+        print('ipcam started!')
+        threading.Thread(target=self.queryframe, daemon=True, args=()).start()
+
+    def stop(self):
+        # 記得要設計停止無限迴圈的開關。
+        self.isstop = True
+        print('ipcam stopped!')
+
+    def getframe(self):
+        # 當有需要影像時，再回傳最新的影像。
+        return self.Frame
+
+    def queryframe(self):
+        # 不斷讀取直到沒有更新的畫面
+        while (not self.isstop):
+            self.status, self.Frame = self.capture.read()
+        self.capture.release()
+
 class DemoRealtime(IO):
     """ A demo for utilizing st-gcn in the realtime action recognition.
     The Openpose python-api is required for this demo.
@@ -37,6 +69,7 @@ class DemoRealtime(IO):
         stgcn_imshow = False
         write_custom_video = True # True imshow
         write_excel = True
+        useLightOpenpose = True
 
         if write_stgcn_video or write_custom_video:
             fps = 30
@@ -73,11 +106,15 @@ class DemoRealtime(IO):
             label_name = [line.rstrip() for line in label_name]
             self.label_name = label_name
 
+        # initiate openpose
+        if useLightOpenpose:
+            lightOpenPose = LightOpenPose(256)
+        else:
+            opWrapper = op.WrapperPython()
+            params = dict(model_folder='./models', model_pose='COCO')
+            opWrapper.configure(params)
+            opWrapper.start()
         # initiate
-        opWrapper = op.WrapperPython()
-        params = dict(model_folder='./models', model_pose='COCO')
-        opWrapper.configure(params)
-        opWrapper.start()
         self.model.eval()
         pose_tracker = naive_pose_tracker()
 
@@ -85,19 +122,27 @@ class DemoRealtime(IO):
             video_capture = cv2.VideoCapture(0)
         elif self.arg.video == 'ip_camera':
             video_path = 'rtsp://admin:admin@192.168.1.245:554/channel1'
-            video_capture = cv2.VideoCapture(video_path)
+            # video_capture = cv2.VideoCapture(video_path)
+            ipcam = ipcamCapture(video_path)
+            ipcam.start()
+            time.sleep(1)
         else:
             video_capture = cv2.VideoCapture(self.arg.video)
 
         # start recognition
         start_time = time.time()
         frame_index = 0
+
+
         while(True):
 
             tic = time.time()
 
             # get image
-            ret, orig_image = video_capture.read()
+            if self.arg.video == 'ip_camera':
+                orig_image = ipcam.getframe()
+            else:
+                ret, orig_image = video_capture.read()
             if orig_image is None:
                 break
             if write_custom_video:
@@ -109,11 +154,20 @@ class DemoRealtime(IO):
                 orig_image, (256 * source_W // source_H, 256))
             H, W, _ = orig_image.shape
             
+            time_after_get_img = time.time()
+            # print('get_img: ' + str(time_after_get_img - tic))
+
             # pose estimation
-            datum = op.Datum()
-            datum.cvInputData = orig_image
-            opWrapper.emplaceAndPop([datum])
-            multi_pose = datum.poseKeypoints  # (num_person, num_joint, 3)
+            if useLightOpenpose:
+                multi_pose = lightOpenPose.getPose(orig_image)
+                if multi_pose.shape[0] == 0:
+                    continue
+            else:
+                datum = op.Datum()
+                datum.cvInputData = orig_image
+                opWrapper.emplaceAndPop([datum])
+                multi_pose = datum.poseKeypoints  # (num_person, num_joint, 3)
+
             if len(multi_pose.shape) != 3:
                 continue
 
@@ -123,6 +177,9 @@ class DemoRealtime(IO):
             multi_pose[:, :, 0:2] = multi_pose[:, :, 0:2] - 0.5
             multi_pose[:, :, 0][multi_pose[:, :, 2] == 0] = 0
             multi_pose[:, :, 1][multi_pose[:, :, 2] == 0] = 0
+
+            time_get_pose = time.time()
+            # print('get pose: ' + str(time_get_pose - time_after_get_img))
 
             # pose tracking
             if self.arg.video == 'camera_source' or self.arg.video == 'ip_camera':
@@ -135,9 +192,16 @@ class DemoRealtime(IO):
             data = data.unsqueeze(0)
             data = data.float().to(self.dev).detach()  # (1, channel, frame, joint, person)
 
+            time_pose_tracking = time.time()
+            # print('pose_tracking: ' + str(time_pose_tracking - time_get_pose))
+
             # model predict
+            # if frame_index % 15 == 0 or frame_index == 1:
             voting_label_name, video_label_name, output, intensity = self.predict(
                 data)
+
+            time_after_predict = time.time()
+            # print('predict: ' + str(time_after_predict - time_pose_tracking))
 
             # visualization
             app_fps = 1 / (time.time() - tic)
@@ -149,9 +213,17 @@ class DemoRealtime(IO):
                 # image = cv2.resize(image, (1918, 1080))
                 out.write(image)
 
+            time_after_show_result = time.time()
+            # print('show result: ' + str(time_after_show_result - time_after_predict))
+
             if cv2.waitKey(1) & 0xFF == ord('q'):
                 break
-        
+
+            # print('all time: ' + str(time.time() - tic))
+
+        totle_time = time.time() -start_time
+        # print('totle time: ' + str(totle_time))
+
         if write_excel:
             for col in range(sheet.max_column - 1):
                 insertCell = sheet.cell(row=1, column=col + 2)

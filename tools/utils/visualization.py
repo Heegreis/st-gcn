@@ -61,9 +61,9 @@ def stgcn_visualize(pose,
                 for i in range(4):
                     label_count[label_sequence[i][m]] = label_count[label_sequence[i][m]] + 1
                 body_label = max(label_count, key=label_count.get)
-                if not body_label == 'nature':
-                    if label_count[body_label] < 4:
-                        body_label = 'nature'
+                # if not body_label == 'nature':
+                #     if label_count[body_label] < 4:
+                #         body_label = 'nature'
             else:
                 body_label = ''
             x_nose = int((pose[0, t, 0, m] + 0.5) * W)
@@ -109,8 +109,10 @@ def stgcn_visualize(pose,
 
         if not out_custom_demo is None:
             out_custom_demo.write(frame_custom_demo)
-            # frame_custom_demo = cv2.resize(frame_custom_demo, (1422, 800))
-            # cv2.imshow('stream', frame_custom_demo)
+            frame_custom_demo = cv2.resize(frame_custom_demo, (1422, 800))
+            if fps is not None:
+                put_text(frame_custom_demo, 'fps:{:.2f}'.format(fps), (0.9, 0.5))
+            cv2.imshow('stream', frame_custom_demo)
 
         # generate mask
         mask = frame * 0
