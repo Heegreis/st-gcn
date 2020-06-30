@@ -204,9 +204,13 @@ class DemoRealtime(IO):
             # print('predict: ' + str(time_after_predict - time_pose_tracking))
 
             # visualization
+            if stgcn_imshow and write_stgcn_video:
+                skip_stgcn_img = False
+            else:
+                skip_stgcn_img = True
             app_fps = 1 / (time.time() - tic)
             image = self.render(data_numpy, voting_label_name,
-                                video_label_name, intensity, orig_image, orig_image_for_show, out_custom_demo, frame_index, sheet, app_fps)
+                                video_label_name, intensity, orig_image, orig_image_for_show, out_custom_demo, frame_index, sheet, skip_stgcn_img, app_fps)
             if stgcn_imshow:
                 cv2.imshow("ST-GCN", image)
             if write_stgcn_video:
@@ -267,7 +271,7 @@ class DemoRealtime(IO):
             video_label_name.append(frame_label_name)
         return voting_label_name, video_label_name, output, intensity
 
-    def render(self, data_numpy, voting_label_name, video_label_name, intensity, orig_image, orig_image_for_show, out_custom_demo, frame_index, sheet, fps=0):
+    def render(self, data_numpy, voting_label_name, video_label_name, intensity, orig_image, orig_image_for_show, out_custom_demo, frame_index, sheet, skip_stgcn_img, fps=0):
         label_sequence = video_label_name[len(video_label_name) - 4:]
         images = utils.visualization.stgcn_visualize(
             data_numpy[:, [-1]],
@@ -277,13 +281,18 @@ class DemoRealtime(IO):
             out_custom_demo,
             frame_index,
             sheet,
+            skip_stgcn_img,
             voting_label_name,
             label_sequence,
             self.arg.height,
             fps=fps)
-        image = next(images)
-        image = image.astype(np.uint8)
-        return image
+        if skip_stgcn_img:
+            image = next(images)
+            return image
+        else:
+            image = next(images)
+            image = image.astype(np.uint8)
+            return image
 
     @staticmethod
     def get_parser(add_help=False):
