@@ -69,7 +69,7 @@ class DemoRealtime(IO):
         stgcn_imshow = False
         write_custom_video = True # True imshow
         write_excel = True
-        useLightOpenpose = True
+        useLightOpenpose = False
 
         if write_stgcn_video or write_custom_video:
             fps = 30
@@ -204,7 +204,7 @@ class DemoRealtime(IO):
             # print('predict: ' + str(time_after_predict - time_pose_tracking))
 
             # visualization
-            if stgcn_imshow and write_stgcn_video:
+            if stgcn_imshow or write_stgcn_video:
                 skip_stgcn_img = False
             else:
                 skip_stgcn_img = True
