@@ -38,6 +38,7 @@ def stgcn_visualize(pose,
                     frame_index,
                     sheet,
                     skip_stgcn_img,
+                    warningPrint,
                     label=None,
                     label_sequence=None,
                     height=1080,
@@ -114,12 +115,15 @@ def stgcn_visualize(pose,
                 custom_demo_pos_y = int(pos_track[m][1] * scale_factor_custom)
                 custom_demo_pos_x_m = int((pos_track[m][0] - 10) * scale_factor_custom)
                 custom_demo_pos_y_m = int(pos_track[m][1] * scale_factor_custom)
-                cv2.putText(frame_custom_demo, body_label, (custom_demo_pos_x, custom_demo_pos_y),
-                            cv2.FONT_HERSHEY_TRIPLEX, 1,
-                            (255, 0, 255))
-                cv2.putText(frame_custom_demo, str(m + 1), (custom_demo_pos_x_m, custom_demo_pos_y_m),
-                            cv2.FONT_HERSHEY_TRIPLEX, 1,
-                            (255, 0, 0))
+                warningText = warningPrint.getWarning(m, body_label, frame_index)
+                cv2.putText(frame_custom_demo, str(m + 1) + warningText, (custom_demo_pos_x_m, custom_demo_pos_y_m),
+                            0, 1, (0, 0, 0), 3)
+                cv2.putText(frame_custom_demo, str(m + 1) + warningText, (custom_demo_pos_x_m, custom_demo_pos_y_m),
+                            0, 1, (255, 144, 30), 2)
+                cv2.putText(frame_custom_demo, warningText, (custom_demo_pos_x, custom_demo_pos_y),
+                            0, 1, (0, 0, 0), 3)
+                cv2.putText(frame_custom_demo, warningText, (custom_demo_pos_x, custom_demo_pos_y),
+                            0, 1, (255, 0, 255), 2)
 
             # write excel
             if frame_index % 15 == 0:  # 每0.5秒在報表紀錄一次動作
