@@ -21,6 +21,8 @@ from openpyxl import Workbook
 from lightOpenPose.lightOpenPose import LightOpenPose
 
 import threading
+from tools.utils.WarningPrint import WarningPrint
+
 
 class ipcamCapture:
     def __init__(self, URL):
@@ -65,7 +67,7 @@ class DemoRealtime(IO):
 
     def start(self):
         # 自訂參數
-        write_stgcn_video = False
+        write_stgcn_video = True
         stgcn_imshow = False
         write_custom_video = True # True imshow
         write_excel = True
@@ -89,6 +91,8 @@ class DemoRealtime(IO):
             wb = Workbook()
             sheet = wb.active
             excelSavePath = 'data/mydata/test_output_custom_excel/' + video_name + '.xlsx'
+
+        warningPrint = WarningPrint()
 
         # load openpose python api
         if self.arg.openpose is not None:
@@ -210,7 +214,7 @@ class DemoRealtime(IO):
                 skip_stgcn_img = True
             app_fps = 1 / (time.time() - tic)
             image = self.render(data_numpy, voting_label_name,
-                                video_label_name, intensity, orig_image, orig_image_for_show, out_custom_demo, frame_index, sheet, skip_stgcn_img, app_fps)
+                                video_label_name, intensity, orig_image, orig_image_for_show, out_custom_demo, frame_index, sheet, skip_stgcn_img, warningPrint, app_fps)
             if stgcn_imshow:
                 cv2.imshow("ST-GCN", image)
             if write_stgcn_video:
@@ -271,7 +275,7 @@ class DemoRealtime(IO):
             video_label_name.append(frame_label_name)
         return voting_label_name, video_label_name, output, intensity
 
-    def render(self, data_numpy, voting_label_name, video_label_name, intensity, orig_image, orig_image_for_show, out_custom_demo, frame_index, sheet, skip_stgcn_img, fps=0):
+    def render(self, data_numpy, voting_label_name, video_label_name, intensity, orig_image, orig_image_for_show, out_custom_demo, frame_index, sheet, skip_stgcn_img, warningPrint, fps=0):
         label_sequence = video_label_name[len(video_label_name) - 4:]
         images = utils.visualization.stgcn_visualize(
             data_numpy[:, [-1]],
@@ -282,6 +286,7 @@ class DemoRealtime(IO):
             frame_index,
             sheet,
             skip_stgcn_img,
+            warningPrint,
             voting_label_name,
             label_sequence,
             self.arg.height,

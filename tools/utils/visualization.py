@@ -133,10 +133,10 @@ def stgcn_visualize(pose,
 
         if not out_custom_demo is None:
             out_custom_demo.write(frame_custom_demo)
-            frame_custom_demo = cv2.resize(frame_custom_demo, (1422, 800))
-            if fps is not None:
-                put_text(frame_custom_demo, 'fps:{:.2f}'.format(fps), (0.9, 0.5))
-            cv2.imshow('stream', frame_custom_demo)
+            # frame_custom_demo = cv2.resize(frame_custom_demo, (1422, 800))
+            # if fps is not None:
+            #     put_text(frame_custom_demo, 'fps:{:.2f}'.format(fps), (0.9, 0.5))
+            # cv2.imshow('stream', frame_custom_demo)
 
         # generate mask
         if not skip_stgcn_img:

@@ -205,8 +205,11 @@ def loop_dir():
     # dataset_path = 'dataset/row_video_for_train'
     # output_path = 'dataset/custom_skeleten_data/noSplitPerson'
 
-    dataset_path = 'dataset/row_video_for_train'
-    output_path = 'dataset/custom_skeleten_data/forSplitPerson'
+    # dataset_path = 'dataset/row_video_for_train'
+    # output_path = 'dataset/custom_skeleten_data/forSplitPerson'
+
+    dataset_path = 'dataset/extra_row_video_train'
+    output_path = 'dataset/custom_skeleten_data/extra'
 
     write_video = True
     add_id = True

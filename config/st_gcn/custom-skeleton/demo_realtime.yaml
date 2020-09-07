@@ -1,6 +1,9 @@
 # weights: ./work_dir/recognition/custom_skeleten/ST_GCN_finetuning/epoch50_model.pt
 # weights: ./work_dir/recognition/custom_skeleten/ST_GCN_fixed_feature_extractor/epoch50_model.pt
-weights: ./work_dir/recognition/custom_skeleten/ST_GCN_sp_finetuning/epoch50_model.pt
+# weights: ./work_dir/recognition/custom_skeleten/ST_GCN_sp_finetuning/epoch50_model.pt
+# weights: ./work_dir/recognition/custom_skeleten/ST_GCN_spemn_finetuning/epoch50_model.pt
+weights: ./work_dir/recognition/custom_skeleten/ST_GCN_spemn_chooseComplete_finetuning/epoch50_model.pt
+# weights: ./work_dir/recognition/custom_skeleten/ST_GCN_spemn_chooseComplete_extraData_finetuning/epoch50_model.pt
 model_fps: 30
 
 # model

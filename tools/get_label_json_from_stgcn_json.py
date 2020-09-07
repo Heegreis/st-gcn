@@ -49,7 +49,13 @@ if __name__ == "__main__":
     # json_dir_path = 'dataset/custom_skeleten_data/noSplitPerson/poses'
     # out_label_json_dir_path = 'dataset/custom_skeleten_data/noSplitPerson'
 
-    json_dir_path = 'dataset/custom_skeleten_data/splitPerson/poses'
-    out_label_json_dir_path = 'dataset/custom_skeleten_data/splitPerson'
+    # json_dir_path = 'dataset/custom_skeleten_data/splitPerson/poses'
+    # out_label_json_dir_path = 'dataset/custom_skeleten_data/splitPerson'
+
+    # json_dir_path = 'dataset/custom_skeleten_data/splitPersonEssenceMoreNature/poses'
+    # out_label_json_dir_path = 'dataset/custom_skeleten_data/splitPersonEssenceMoreNature'
+
+    json_dir_path = 'dataset/custom_skeleten_data/extra_splitPersonEssenceMoreNature/poses'
+    out_label_json_dir_path = 'dataset/custom_skeleten_data/extra_splitPersonEssenceMoreNature'
 
     loop_dir(json_dir_path, out_label_json_dir_path)

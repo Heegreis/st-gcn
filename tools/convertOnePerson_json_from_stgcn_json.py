@@ -147,9 +147,13 @@ if __name__ == "__main__":
     # out_json_dir_path = 'dataset/custom_skeleten_data/forSplitPerson_with_ID/new_poses'
     # out_name_list_dir_path = 'dataset/custom_skeleten_data/forSplitPerson_with_ID'
 
-    json_dir_path = 'dataset/custom_skeleten_data/forSplitPerson_with_ID/poses'
-    out_json_dir_path = 'dataset/custom_skeleten_data/forSplitPerson_with_ID/new_poses_essence'
-    out_name_list_dir_path = 'dataset/custom_skeleten_data/forSplitPerson_with_ID'
+    # json_dir_path = 'dataset/custom_skeleten_data/forSplitPerson_with_ID/poses'
+    # out_json_dir_path = 'dataset/custom_skeleten_data/forSplitPerson_with_ID/new_poses_essence'
+    # out_name_list_dir_path = 'dataset/custom_skeleten_data/forSplitPerson_with_ID'
+
+    json_dir_path = 'dataset/custom_skeleten_data/extra_with_ID/poses'
+    out_json_dir_path = 'dataset/custom_skeleten_data/extra_with_ID/new_poses_essence'
+    out_name_list_dir_path = 'dataset/custom_skeleten_data/extra_with_ID'
 
     loop_dir_onePerson_essence(json_dir_path, out_name_list_dir_path, out_json_dir_path)
     # loop_dir_for_get_all_file_name(json_dir_path, out_name_list_dir_path)

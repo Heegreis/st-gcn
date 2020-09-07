@@ -8,13 +8,21 @@ train_feeder_args:
   window_size: 150 
   # data_path: ./dataset/custom_skeleten_data/noSplitPerson_train_val/train_data.npy
   # label_path: ./dataset/custom_skeleten_data/noSplitPerson_train_val/train_label.pkl
-  data_path: ./dataset/custom_skeleten_data/splitPerson_train_val/train_data.npy
-  label_path: ./dataset/custom_skeleten_data/splitPerson_train_val/train_label.pkl
+  # data_path: ./dataset/custom_skeleten_data/splitPerson_train_val/train_data.npy
+  # label_path: ./dataset/custom_skeleten_data/splitPerson_train_val/train_label.pkl
+  # data_path: ./dataset/custom_skeleten_data/splitPersonEssenceMoreNature_train_val/train_data.npy
+  # label_path: ./dataset/custom_skeleten_data/splitPersonEssenceMoreNature_train_val/train_label.pkl
+  data_path: ./dataset/custom_skeleten_data/splitPersonEssenceMoreNature_with_extra_train_val/train_data.npy
+  label_path: ./dataset/custom_skeleten_data/splitPersonEssenceMoreNature_with_extra_train_val/train_label.pkl
 test_feeder_args:
   # data_path: ./dataset/custom_skeleten_data/noSplitPerson_train_val/val_data.npy
   # label_path: ./dataset/custom_skeleten_data/noSplitPerson_train_val/val_label.pkl
-  data_path: ./dataset/custom_skeleten_data/splitPerson_train_val/val_data.npy
-  label_path: ./dataset/custom_skeleten_data/splitPerson_train_val/val_label.pkl
+  # data_path: ./dataset/custom_skeleten_data/splitPerson_train_val/val_data.npy
+  # label_path: ./dataset/custom_skeleten_data/splitPerson_train_val/val_label.pkl
+  # data_path: ./dataset/custom_skeleten_data/splitPersonEssenceMoreNature_train_val/val_data.npy
+  # label_path: ./dataset/custom_skeleten_data/splitPersonEssenceMoreNature_train_val/val_label.pkl
+  data_path: ./dataset/custom_skeleten_data/splitPersonEssenceMoreNature_with_extra_train_val/val_data.npy
+  label_path: ./dataset/custom_skeleten_data/splitPersonEssenceMoreNature_with_extra_train_val/val_label.pkl
 
 
 # model

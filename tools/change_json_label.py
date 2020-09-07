@@ -29,5 +29,6 @@ def loop_dir(json_dir_path):
                 
 
 if __name__ == "__main__":
-    json_dir_path = 'dataset/custom_skeleten_data/noSplitPerson/poses'
+    # json_dir_path = 'dataset/custom_skeleten_data/noSplitPerson/poses'
+    json_dir_path = 'dataset/custom_skeleten_data/splitPersonEssenceMoreNature/poses'
     loop_dir(json_dir_path)

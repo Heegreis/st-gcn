@@ -22,7 +22,7 @@ def get_video_WH(video_path):
     return W, H
 
 def loop_dir(ori_videos_dir_path, out_videos_dir_path, out_imgs_dir_path):
-    addTime = True
+    addTime = False
     video_fps = 30
     frame_interval_for_time = 15
 
@@ -111,8 +111,8 @@ def loop_single_dir(ori_videos_dir_path, out_videos_dir_path, out_imgs_dir_path)
                             str(time_screen) + ' sec', (50, 70), 0, 1.8, (0, 255, 0),
                             3)
 
-            # cv2.putText(orig_image, str(frame_index), (20, 30), 0, 1,
-            #             (0, 255, 0), 2)
+            cv2.putText(orig_image, str(frame_index), (20, 30), 0, 1,
+                        (0, 255, 0), 2)
             out.write(orig_image)
 
             mkdirs(os.path.join(out_imgs_dir_path, video_name))
@@ -128,12 +128,22 @@ if __name__ == "__main__":
     # ori_videos_dir_path = 'dataset/custom_skeleten_data/forSplitPerson_with_ID/videos'
     # out_videos_dir_path = 'dataset/custom_skeleten_data/forSplitPerson_with_ID/videos_with_frame_index'
     # out_imgs_dir_path = 'dataset/custom_skeleten_data/forSplitPerson_with_ID/frame_imgs'
+    
     # ori_videos_dir_path = 'dataset/test/custom_skeleten_data/forSplitPerson_with_ID/videos'
     # out_videos_dir_path = 'dataset/test/custom_skeleten_data/forSplitPerson_with_ID/videos_with_frame_index'
     # out_imgs_dir_path = 'dataset/test/custom_skeleten_data/forSplitPerson_with_ID/frame_imgs'
-    ori_videos_dir_path = 'data/mydata/test_output_custom_demo/0601_nolabel'
-    out_videos_dir_path = 'data/mydata/test_output_custom_demo/0601_nolabel_with_frame_index'
-    out_imgs_dir_path = 'data/mydata/test_output_custom_demo/0601_nolabel_frame_imgs'
+    
+    # ori_videos_dir_path = 'data/mydata/test_output_custom_demo/0601_nolabel'
+    # out_videos_dir_path = 'data/mydata/test_output_custom_demo/0601_nolabel_with_frame_index'
+    # out_imgs_dir_path = 'data/mydata/test_output_custom_demo/0601_nolabel_frame_imgs'
+
+    # ori_videos_dir_path = 'dataset/custom_skeleten_data/extra_with_ID/videos'
+    # out_videos_dir_path = 'dataset/custom_skeleten_data/extra_with_ID/videos_with_frame_index'
+    # out_imgs_dir_path = 'dataset/custom_skeleten_data/extra_with_ID/frame_imgs'
+
+    ori_videos_dir_path = 'data/mydata/test_output_custom_demo/newK_video/正式'
+    out_videos_dir_path = 'data/mydata/test_output_custom_demo/newK_video_with_frame_index/正式'
+    out_imgs_dir_path = 'data/mydata/test_output_custom_demo/newK_video_frame_imgs/正式'
 
     mkdirs(out_videos_dir_path)
     mkdirs(out_imgs_dir_path)
